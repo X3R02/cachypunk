@@ -1,0 +1,298 @@
+#!/usr/bin/env bash
+# cachypunk - install and keep in sync the Cachypunk Hyprland desktop.
+#
+#   cachypunk install [--modules a,b] [--yes]   packages, links, theme, modules
+#   cachypunk update                             git pull, then re-apply
+#   cachypunk link                               (re)create the symlinks only
+#   cachypunk status                             links, packages, repo state
+#
+# The repo is the config: every path in links.txt is a symlink from $HOME into
+# home/, so editing ~/.config/hypr edits the repo, and `git pull` here (or
+# `cachypunk update`) applies another machine's changes at once.
+#
+# Optional modules (asked during install, remembered for update):
+#   sddm         login screen styled as the lock screen        (needs root)
+#   sudo-panel   sudo's fingerprint/password prompt as a panel (needs root)
+#   fingerprint  fprintd, for sudo, polkit and hyprlock
+#   laptop       TLP power management
+#
+# Per-machine settings live outside the repo in ~/.config/cachypunk/:
+#   user.lua      keyboard layout, browser, SUPER+<letter> apps, autostart
+#   wallpapers/   <theme>.jpg|png, your own image for each theme
+#   modules       the optional modules this machine uses
+
+set -euo pipefail
+
+REPO=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
+STATE="$HOME/.config/cachypunk"
+MODULES_FILE="$STATE/modules"
+ALL_MODULES="sddm sudo-panel fingerprint laptop"
+
+say() { printf '\033[1m::\033[0m %s\n' "$*"; }
+warn() { printf '\033[33m::\033[0m %s\n' "$*" >&2; }
+die() {
+	printf '\033[31m::\033[0m %s\n' "$*" >&2
+	exit 1
+}
+
+# Ask a yes/no question; --yes answers yes to all of them
+ASSUME_YES=0
+ask() {
+	[ "$ASSUME_YES" = 1 ] && return 0
+	local reply
+	read -r -p ":: $1 [y/N] " reply
+	[[ "$reply" =~ ^[YySs] ]]
+}
+
+# Package names from a list file, without comments and blank lines
+packages() { grep -v -e '^\s*#' -e '^\s*$' "$REPO/packages/$1.txt"; }
+
+aur_helper() {
+	command -v paru >/dev/null && { echo paru; return; }
+	command -v yay >/dev/null && { echo yay; return; }
+	echo ""
+}
+
+check_system() {
+	[ "$(id -u)" != 0 ] || die "run as your user, not root: it asks for sudo when it needs it"
+	command -v pacman >/dev/null || die "this installer is for Arch and its derivatives (pacman)"
+	command -v git >/dev/null || die "git is needed"
+}
+
+bootstrap_aur_helper() {
+	[ -n "$(aur_helper)" ] && return
+	say "No AUR helper found (paru or yay). Quickshell, walker and elephant come from the AUR."
+	ask "Build and install paru now?" || die "install paru or yay, then run this again"
+	sudo pacman -S --needed --noconfirm base-devel git
+	local tmp
+	tmp=$(mktemp -d)
+	git clone --depth 1 https://aur.archlinux.org/paru-bin.git "$tmp/paru-bin"
+	(cd "$tmp/paru-bin" && makepkg -si --noconfirm)
+	rm -rf "$tmp"
+}
+
+install_packages() {
+	local lists=(base) m
+	for m in $(cat "$MODULES_FILE" 2>/dev/null); do
+		[ -f "$REPO/packages/$m.txt" ] && lists+=("$m")
+	done
+	local wanted=() list
+	for list in "${lists[@]}"; do
+		mapfile -t -O "${#wanted[@]}" wanted < <(packages "$list")
+	done
+	local missing=() p
+	for p in "${wanted[@]}"; do
+		pacman -Qq "$p" >/dev/null 2>&1 || missing+=("$p")
+	done
+	if [ "${#missing[@]}" = 0 ]; then
+		say "Packages: all ${#wanted[@]} installed"
+		return
+	fi
+	say "Packages to install: ${missing[*]}"
+	"$(aur_helper)" -S --needed "${missing[@]}"
+}
+
+# Symlink every links.txt entry; whatever was there moves to a timestamped
+# backup first, so nothing of yours is ever overwritten
+link_all() {
+	local backup="$HOME/.local/state/cachypunk/backups/$(date +%Y%m%d-%H%M%S)"
+	local path src dst moved=0 linked=0
+	while IFS= read -r path; do
+		path=${path%%#*}
+		path=${path%"${path##*[![:space:]]}"}
+		[ -n "$path" ] || continue
+		src="$REPO/home/$path"
+		dst="$HOME/$path"
+		[ -e "$src" ] || {
+			warn "links.txt lists $path, missing from home/"
+			continue
+		}
+		[ "$(readlink "$dst" 2>/dev/null)" = "$src" ] && continue
+		if [ -e "$dst" ] || [ -L "$dst" ]; then
+			mkdir -p "$(dirname "$backup/$path")"
+			mv "$dst" "$backup/$path"
+			moved=$((moved + 1))
+		fi
+		mkdir -p "$(dirname "$dst")"
+		ln -s "$src" "$dst"
+		linked=$((linked + 1))
+	done <"$REPO/links.txt"
+	# This script itself, so `cachypunk update` works from anywhere
+	ln -sfn "$REPO/cachypunk" "$HOME/.local/bin/cachypunk"
+	if [ "$moved" -gt 0 ]; then
+		say "Links: $linked created, $moved existing files moved to $backup"
+	else
+		say "Links: $linked created"
+	fi
+}
+
+# Files that need this machine's $HOME written into them. Qt's colour-scheme
+# path must be absolute, and qt5ct/qt6ct rewrite their conf from the GUI, so
+# these are generated rather than linked
+write_generated() {
+	local q
+	for q in qt5ct qt6ct; do
+		mkdir -p "$HOME/.config/$q"
+		sed "s#@HOME@#$HOME#g" "$REPO/templates/$q.conf" >"$HOME/.config/$q/$q.conf"
+	done
+}
+
+user_layer() {
+	mkdir -p "$STATE/wallpapers"
+	if [ ! -f "$STATE/user.lua" ]; then
+		cp "$REPO/examples/user.lua" "$STATE/user.lua"
+		say "Created $STATE/user.lua from the example: set your keyboard layout and apps there"
+	fi
+}
+
+desktop_settings() {
+	gsettings set org.gnome.desktop.interface color-scheme prefer-dark
+	gsettings set org.gnome.desktop.interface gtk-theme adw-gtk3-dark
+	gsettings set org.gnome.desktop.interface icon-theme NightCity
+	gsettings set org.gnome.desktop.interface font-name 'IBM Plex Sans 11'
+	gsettings set org.gnome.desktop.interface monospace-font-name 'JetBrainsMono Nerd Font 11'
+	fc-cache -f >/dev/null
+	xdg-user-dirs-update 2>/dev/null || true
+	systemctl --user daemon-reload
+	systemctl --user enable --now wl-clip-persist.service >/dev/null 2>&1 ||
+		warn "could not start wl-clip-persist (fine outside a graphical session)"
+}
+
+apply_theme() {
+	say "Applying the theme"
+	"$HOME/.local/bin/theme-set" || warn "theme-set reported a problem; run it again inside Hyprland"
+}
+
+choose_modules() {
+	local chosen="$1" m
+	if [ -z "$chosen" ]; then
+		chosen=$(cat "$MODULES_FILE" 2>/dev/null | tr '\n' ',')
+		if [ -z "$chosen" ]; then
+			for m in $ALL_MODULES; do
+				case $m in
+				sddm) ask "Module sddm: login screen styled as the lock screen?" && chosen+="$m," ;;
+				sudo-panel) ask "Module sudo-panel: sudo's prompt as a panel (replaces /etc/pam.d/sudo)?" && chosen+="$m," ;;
+				fingerprint) ask "Module fingerprint: fprintd for sudo, polkit and hyprlock?" && chosen+="$m," ;;
+				laptop) ask "Module laptop: TLP power management?" && chosen+="$m," ;;
+				esac
+			done
+		fi
+	fi
+	mkdir -p "$STATE"
+	tr ',' '\n' <<<"$chosen" | grep -v '^$' | sort -u >"$MODULES_FILE" || true
+	for m in $(cat "$MODULES_FILE"); do
+		[[ " $ALL_MODULES " == *" $m "* ]] || die "unknown module: $m (known: $ALL_MODULES)"
+	done
+}
+
+# Root parts of the modules. Each installer is idempotent, so update re-runs them
+apply_modules() {
+	local m
+	for m in $(cat "$MODULES_FILE" 2>/dev/null); do
+		case $m in
+		sddm)
+			say "Module sddm"
+			sudo "$HOME/.config/sddm/matugen/install.sh"
+			if ! systemctl is-enabled sddm.service >/dev/null 2>&1; then
+				warn "sddm is installed but not enabled. If no other login manager runs:"
+				warn "  sudo systemctl enable sddm.service"
+			fi
+			;;
+		sudo-panel)
+			say "Module sudo-panel: this replaces /etc/pam.d/sudo (the stock one is kept as sudo.bak-auth-prompts)"
+			warn "Keep a root shell open (sudo -s, in another terminal) until sudo works again"
+			if ask "Install it now?"; then
+				sudo "$HOME/.config/auth-prompts/install.sh"
+			fi
+			;;
+		fingerprint)
+			say "Module fingerprint: enroll a finger with  fprintd-enroll  if you haven't"
+			;;
+		laptop)
+			say "Module laptop"
+			sudo systemctl enable --now tlp.service
+			;;
+		esac
+	done
+}
+
+check_hyprland() {
+	local v
+	v=$(Hyprland --version 2>/dev/null | grep -oE 'Hyprland [0-9]+\.[0-9]+' | head -1 | cut -d' ' -f2)
+	if [ -n "$v" ] && [ "$(printf '%s\n0.55\n' "$v" | sort -V | head -1)" != "0.55" ]; then
+		warn "Hyprland $v is older than 0.55: this config is Lua and needs 0.55 or newer"
+	fi
+}
+
+cmd_install() {
+	local modules=""
+	while [ $# -gt 0 ]; do
+		case $1 in
+		--modules) modules=$2 && shift ;;
+		--modules=*) modules=${1#*=} ;;
+		--yes | -y) ASSUME_YES=1 ;;
+		*) die "unknown option: $1" ;;
+		esac
+		shift
+	done
+	check_system
+	choose_modules "$modules"
+	bootstrap_aur_helper
+	install_packages
+	check_hyprland
+	link_all
+	write_generated
+	user_layer
+	desktop_settings
+	apply_theme
+	apply_modules
+	say "Done. Log out and pick Hyprland, or reload it: hyprctl reload"
+}
+
+cmd_update() {
+	check_system
+	say "Pulling $REPO"
+	git -C "$REPO" pull --ff-only || die "pull failed: commit or stash your local changes first"
+	ASSUME_YES=1
+	install_packages
+	link_all
+	write_generated
+	desktop_settings
+	apply_theme
+	apply_modules
+	hyprctl reload >/dev/null 2>&1 || true
+	say "Updated to $(git -C "$REPO" log -1 --format='%h %s')"
+}
+
+cmd_status() {
+	local path src dst ok=0 bad=0
+	while IFS= read -r path; do
+		path=${path%%#*}
+		path=${path%"${path##*[![:space:]]}"}
+		[ -n "$path" ] || continue
+		src="$REPO/home/$path"
+		dst="$HOME/$path"
+		if [ "$(readlink "$dst" 2>/dev/null)" = "$src" ]; then
+			ok=$((ok + 1))
+		else
+			bad=$((bad + 1))
+			echo "  not linked: ~/$path"
+		fi
+	done <"$REPO/links.txt"
+	say "Links: $ok ok, $bad not linked"
+	local missing
+	missing=$( (packages base; for m in $(cat "$MODULES_FILE" 2>/dev/null); do [ -f "$REPO/packages/$m.txt" ] && packages "$m"; done) |
+		while read -r p; do pacman -Qq "$p" >/dev/null 2>&1 || echo "$p"; done | tr '\n' ' ')
+	say "Packages missing: ${missing:-none}"
+	say "Modules: $(tr '\n' ' ' <"$MODULES_FILE" 2>/dev/null || echo none)"
+	say "Repo: $(git -C "$REPO" log -1 --format='%h %s' 2>/dev/null)"
+	git -C "$REPO" status --short
+}
+
+case ${1:-} in
+install) shift && cmd_install "$@" ;;
+update) cmd_update ;;
+link) link_all ;;
+status) cmd_status ;;
+*) sed -n '2,24p' "$0" | sed 's/^# \{0,1\}//' ;;
+esac

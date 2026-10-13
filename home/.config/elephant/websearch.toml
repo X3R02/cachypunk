@@ -1,0 +1,20 @@
+# Web search in walker. Results open through xdg-open, which mimeapps.list
+# routes to Brave Origin.
+always_show_default = true
+command = 'xdg-open'
+engines_as_actions = false
+history = true
+history_when_empty = false
+text_prefix = 'Search: '
+default = 'Brave Search'
+
+[[entries]]
+name = 'Brave Search'
+url = 'https://search.brave.com/search?q=%TERM%'
+icon = 'brave-origin'
+
+[Config]
+hide_from_providerlist = false
+icon = 'applications-internet'
+min_score = 20
+name_pretty = ''

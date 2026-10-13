@@ -1,0 +1,79 @@
+# Required: the desktop itself. One package per line; # starts a comment.
+# Installed with an AUR helper (paru or yay), which takes repo packages from
+# the repos and builds the rest from the AUR. Names work on Arch and CachyOS.
+
+# Compositor and its companions
+hyprland
+hypridle
+hyprlock
+hyprsunset
+hyprpicker
+xdg-desktop-portal-hyprland
+hyprland-preview-share-picker-git
+
+# Shell (bar, panels, OSD, notifications, wallpaper, polkit agent)
+quickshell
+polkit
+
+# Theming: palettes rendered into every app's config
+matugen
+imagemagick
+jq
+python
+gettext
+librsvg
+adw-gtk-theme
+qt5ct
+qt6ct
+qt6-wayland
+
+# Launcher. elephant's providers are Go plugins built against elephant itself:
+# keep them all source packages, never mix in -bin builds
+walker
+elephant
+elephant-calc
+elephant-clipboard
+elephant-desktopapplications
+elephant-files
+elephant-menus
+elephant-providerlist
+elephant-runner
+elephant-symbols
+elephant-websearch
+elephant-windows
+
+# Apps the binds and panels open
+ghostty
+nautilus
+neovim
+wiremix
+bluetui
+nm-connection-editor
+fastfetch
+
+# Hardware the panels drive
+pipewire
+pipewire-pulse
+wireplumber
+playerctl
+brightnessctl
+upower
+networkmanager
+bluez
+bluez-utils
+
+# Screenshots and clipboard
+grim
+slurp
+satty
+wl-clipboard
+wl-clip-persist
+
+# Fonts (Rajdhani ships in this repo: it is the UI face)
+ttf-ibm-plex
+ttf-jetbrains-mono-nerd
+ttf-nerd-fonts-symbols
+noto-fonts
+noto-fonts-emoji
+
+xdg-user-dirs

@@ -1,0 +1,32 @@
+# What `cachypunk link` symlinks from home/ into $HOME, one path per line,
+# relative to both. A directory is linked whole: everything inside it is
+# tracked, except what .gitignore lists (files theme-set generates there).
+# Files are linked one by one where the app keeps other state in the same
+# directory (gtk-3.0 holds your bookmarks, systemd/user your other units).
+
+.config/hypr
+.config/quickshell
+.config/matugen
+.config/walker
+.config/elephant
+.config/ghostty
+.config/sddm
+.config/auth-prompts
+.config/nvim
+.config/environment.d/10-qt.conf
+.config/fontconfig/fonts.conf
+.config/gtk-3.0/settings.ini
+.config/systemd/user/wl-clip-persist.service
+
+.local/bin/theme-set
+.local/bin/theme-icons
+.local/bin/theme-slurp
+.local/bin/hypr-keybinds
+.local/bin/hypr-wallpaper-apply
+.local/bin/hypridle-toggle
+.local/bin/hyprsunset-toggle
+.local/bin/hypr-kblayout-toggle
+.local/bin/agent-usage
+.local/bin/agent-usage-claude
+
+.local/share/fonts/Rajdhani

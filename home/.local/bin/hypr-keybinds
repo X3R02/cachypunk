@@ -1,0 +1,54 @@
+#!/usr/bin/env bash
+# Hyprland keybinding cheatsheet, rendered as a searchable walker dmenu list.
+#
+# Reads ~/.cache/hypr/keybinds.json, which lua/keys.lua writes on every Hyprland
+# config load. The list therefore always reflects the binds actually loaded -
+# there is no second copy of the keymap to keep in sync.
+#
+# Bound to SUPER + K, and also has a desktop entry
+# (~/.local/share/applications/hypr-keybinds.desktop) so it can be found by
+# typing "keybind" in the launcher.
+
+set -uo pipefail
+
+CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/hypr/keybinds.json"
+
+if [ ! -s "$CACHE" ]; then
+	notify-send "Keybindings unavailable" "No cheatsheet at $CACHE. Reload Hyprland (hyprctl reload) to regenerate it." 2>/dev/null
+	exit 1
+fi
+
+# Tier order is meaningful - it is the modifier philosophy, from most direct to
+# most incidental - so sort by it rather than alphabetically.
+render() {
+	python3 - "$CACHE" <<'PY'
+import json, sys
+
+ORDER = {"Direct": 0, "Window": 1, "System": 2, "Alternative": 3, "Hardware": 4}
+
+with open(sys.argv[1]) as f:
+    binds = json.load(f)
+
+# Collapse the bare hardware keys to something readable: XF86AudioRaiseVolume
+# says less at a glance than the description next to it.
+def combo(b):
+    c = b["combo"]
+    return c.replace("XF86", "") if b["tier"] == "Hardware" else c
+
+rows = sorted(binds, key=lambda b: (ORDER.get(b["tier"], 9), b["combo"]))
+width = max((len(combo(b)) for b in rows), default=0)
+
+for b in rows:
+    print(f"{combo(b):<{width}}   {b['desc']}   [{b['tier']}]")
+PY
+}
+
+# dmenu writes the picked line to stdout; a cheatsheet has nothing to act on, so
+# it is discarded. Dismissing the list without picking anything exits 1, which is
+# the normal way to close a cheatsheet - don't report it as a failure.
+render | walker --dmenu \
+	--placeholder "Search a key or an action" \
+	--width 900 \
+	>/dev/null || true
+
+exit 0

@@ -1,0 +1,41 @@
+#!/bin/bash
+# Refresh AI agent usage records: agent-usage [collector args...]
+#
+# Runs every agent-usage-<agent> collector next to this script (in parallel)
+# and writes each one's JSON record to ~/.local/state/agent-usage/<agent>.json,
+# then prints all records as one JSON array for the Quickshell bar. Arguments
+# (--force, --limits-only) are passed to every collector.
+#
+# Same layout as Omarchy's omarchy-agent-usage-update, minus its multi-account
+# handling: adding an agent means dropping in its collector, nothing else.
+# Collectors are vendored from Omarchy (see the header of each).
+
+state="${XDG_STATE_HOME:-$HOME/.local/state}/agent-usage"
+mkdir -p "$state"
+bindir=$(dirname "$(readlink -f "$0")")
+
+pids=()
+for collector in "$bindir"/agent-usage-*; do
+	[ -x "$collector" ] || continue
+	agent="${collector##*/agent-usage-}"
+	(
+		tmp=$(mktemp "$state/.$agent.XXXXXX")
+		# A failed run keeps the previous record rather than blanking the agent
+		if "$collector" "$@" >"$tmp" && jq -e . "$tmp" >/dev/null 2>&1; then
+			mv "$tmp" "$state/$agent.json"
+		else
+			rm -f "$tmp"
+			echo "agent-usage: $agent collector failed" >&2
+		fi
+	) &
+	pids+=($!)
+done
+for pid in "${pids[@]}"; do wait "$pid"; done
+
+shopt -s nullglob
+records=("$state"/*.json)
+if [ ${#records[@]} -eq 0 ]; then
+	echo "[]"
+else
+	jq -cs . "${records[@]}"
+fi

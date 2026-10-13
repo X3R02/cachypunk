@@ -1,0 +1,29 @@
+#!/bin/sh
+# Cycle every keyboard to the next xkb layout and announce the result on the OSD.
+#
+# The layouts come from keyboard_layout in ~/.config/cachypunk/user.lua (for
+# example "latam,us": a laptop board in one layout, an external one in
+# another), so each has to be reachable on whichever keyboard is in use.
+#
+# `switchxkblayout all` moves every keyboard at once rather than a named device.
+# That is deliberate: hyprctl devices lists many keyboards (video bus, sleep
+# button and vendor extra buttons all count), and an external one comes and
+# goes with its receiver, so any hardcoded device list would drift.
+#
+# This is a script behind exec_cmd rather than a plain bind because Hyprland's
+# Lua API has no dispatcher for xkb - hl.dsp carries no entry for it - so
+# hyprctl's own switchxkblayout command is the only route.
+
+hyprctl switchxkblayout all next >/dev/null || exit 1
+
+# Read the layout back off the keyboard flagged main, the one actually being
+# typed on, instead of tracking a counter here. A config reload resets every
+# index to 0 without telling us, so asking is the only thing that cannot drift.
+# Falls back to the human-readable keymap name if the layout list is reported
+# as the active layout alone rather than the configured comma list.
+layout=$(hyprctl devices -j | jq -r '
+	first(.keyboards[] | select(.main)) as $kb
+	| (($kb.layout | split(","))[$kb.active_layout_index] // $kb.active_keymap // empty)
+')
+
+qs ipc call osd message "󰌌" "Layout: ${layout:-changed}"

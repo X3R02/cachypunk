@@ -1,0 +1,18 @@
+#!/bin/bash
+# slurp with the current theme's colours: the dimmed screen in the background
+# colour and a coral border, dimensions in Rajdhani. The flags come from
+# ~/.config/theme/slurp.args, rendered by matugen on theme-set; any arguments
+# given here are passed through.
+#
+# The geometry is printed only after a short pause: grim runs as soon as slurp
+# exits, and without the pause it captured slurp's overlay still on screen -
+# the dimmed tint and the coral border ended up inside the screenshot. The
+# selection's inside is kept transparent too, as a second guard.
+args_file="$HOME/.config/theme/slurp.args"
+args=()
+# shellcheck disable=SC2207  # the file holds whitespace-separated flags on purpose
+[ -r "$args_file" ] && args=($(cat "$args_file"))
+
+geometry=$(slurp "${args[@]}" "$@") || exit $?
+sleep 0.1
+printf '%s\n' "$geometry"

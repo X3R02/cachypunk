@@ -1,0 +1,1 @@
+/home/donmoai/.config/theme/nvim.lua

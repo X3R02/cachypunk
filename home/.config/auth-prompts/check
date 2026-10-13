@@ -1,0 +1,23 @@
+#!/bin/sh
+# Run by the pacman hook after sudo or fprintd change. Only warns: the panel is
+# reinstalled by hand with ~/.config/auth-prompts/install.sh, never from here,
+# since this runs as root and must not install files from a home directory.
+lib=/usr/local/lib/auth-prompts
+warn() { echo "auth-prompts: $*"; }
+
+[ -f /etc/pam.d/sudo.pacnew ] &&
+	warn "/etc/pam.d/sudo.pacnew exists. Do not replace /etc/pam.d/sudo with it: merge by hand keeping the auth-prompts lines, or re-run install.sh"
+
+grep -q "$lib/granted" /etc/pam.d/sudo ||
+	warn "/etc/pam.d/sudo lost the panel lines: re-run install.sh"
+
+# A string that is gone from the binary falls back to stock text, unstyled
+for pair in fprintd:/usr/lib/security/pam_fprintd.so sudoers:/usr/lib/sudo/sudoers.so; do
+	domain=${pair%%:*} binary=${pair#*:}
+	[ -f "$binary" ] || continue
+	while IFS= read -r msgid; do
+		grep -aqF -- "$msgid" "$binary" ||
+			warn "$domain no longer uses \"$msgid\": update generate.py"
+	done <"$lib/msgids-$domain"
+done
+exit 0

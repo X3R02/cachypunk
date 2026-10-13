@@ -1,0 +1,93 @@
+# Themes are fixed palettes in themes/*.json, applied with `theme-set <name>`
+# (~/.local/bin/theme-set). matugen only renders the templates below; the
+# reloads live in theme-set so they run once, not per template.
+
+[config]
+
+[templates.hyprland]
+input_path = "~/.config/matugen/templates/hyprland.lua"
+output_path = "~/.config/theme/hyprland.lua"
+
+[templates.ghostty]
+input_path = "~/.config/matugen/templates/ghostty.conf"
+output_path = "~/.config/theme/ghostty.conf"
+
+[templates.hyprlock]
+input_path = "~/.config/matugen/templates/hyprlock.conf"
+output_path = "~/.config/theme/hyprlock.conf"
+
+[templates.nvim]
+input_path = "~/.config/matugen/templates/nvim.lua"
+output_path = "~/.config/theme/nvim.lua"
+
+[templates.share-picker]
+input_path = "~/.config/matugen/templates/share-picker.css"
+output_path = "~/.config/theme/share-picker.css"
+
+[templates.quickshell]
+input_path = "~/.config/matugen/templates/Colors.qml"
+output_path = "~/.config/quickshell/Colors.qml"
+
+[templates.walker]
+input_path = "~/.config/matugen/templates/walker.css"
+output_path = "~/.config/walker/themes/matugen/style.css"
+
+[templates.gtk3]
+input_path = "~/.config/matugen/templates/gtk3.css"
+output_path = "~/.config/gtk-3.0/gtk.css"
+
+[templates.gtk4]
+input_path = "~/.config/matugen/templates/gtk4.css"
+output_path = "~/.config/gtk-4.0/gtk.css"
+
+[templates.sddm]
+input_path = "~/.config/matugen/templates/sddm.conf"
+output_path = "~/.config/theme/sddm.conf"
+
+[templates.firefox-chrome]
+input_path = "~/.config/matugen/templates/firefox-chrome.css"
+output_path = "~/.config/theme/firefox-chrome.css"
+
+[templates.firefox-content]
+input_path = "~/.config/matugen/templates/firefox-content.css"
+output_path = "~/.config/theme/firefox-content.css"
+
+[templates.obsidian]
+input_path = "~/.config/matugen/templates/obsidian.css"
+output_path = "~/.config/theme/obsidian.css"
+
+[templates.qt5ct]
+input_path = "~/.config/matugen/templates/qt5ct.conf"
+output_path = "~/.config/qt5ct/colors/matugen.conf"
+
+[templates.qt6ct]
+input_path = "~/.config/matugen/templates/qt6ct.conf"
+output_path = "~/.config/qt6ct/colors/matugen.conf"
+
+[templates.walker-tab]
+input_path = "~/.config/matugen/templates/walker-tab.svg"
+output_path = "~/.config/walker/themes/matugen/tab.svg"
+
+[templates.walker-corner]
+input_path = "~/.config/matugen/templates/walker-corner.svg"
+output_path = "~/.config/walker/themes/matugen/corner.svg"
+
+[templates.walker-item-selected]
+input_path = "~/.config/matugen/templates/walker-item-selected.svg"
+output_path = "~/.config/walker/themes/matugen/item-selected.svg"
+
+[templates.slurp]
+input_path = "~/.config/matugen/templates/slurp.args"
+output_path = "~/.config/theme/slurp.args"
+
+[templates.satty]
+input_path = "~/.config/matugen/templates/satty.toml"
+output_path = "~/.config/satty/config.toml"
+
+[templates.hyprtoolkit]
+input_path = "~/.config/matugen/templates/hyprtoolkit.conf"
+output_path = "~/.config/hypr/hyprtoolkit.conf"
+
+[templates.fastfetch]
+input_path = "~/.config/matugen/templates/fastfetch.jsonc"
+output_path = "~/.config/fastfetch/config.jsonc"

@@ -1,0 +1,1 @@
+-b {{theme.bg}}99 -c {{theme.structure}}ff -s #00000000 -B {{theme.accent}}22 -w 2 -F Rajdhani

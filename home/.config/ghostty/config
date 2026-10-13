@@ -1,0 +1,4 @@
+config-file = ~/.config/theme/ghostty.conf
+
+# One step below the default of 12, which is where ctrl+- always ended up
+font-size = 11

@@ -1,0 +1,4 @@
+# Optional module "laptop": power management. tlp-pd provides the power
+# profiles D-Bus API the bar reads; it replaces power-profiles-daemon
+tlp
+tlp-pd

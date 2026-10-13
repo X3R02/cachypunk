@@ -1,0 +1,13 @@
+# Installed by ~/.config/auth-prompts/install.sh: after sudo or fprintd change,
+# warn if the auth panel needs attention (see /usr/local/lib/auth-prompts/check).
+[Trigger]
+Operation = Install
+Operation = Upgrade
+Type = Package
+Target = sudo
+Target = fprintd
+
+[Action]
+Description = Checking the sudo auth panel...
+When = PostTransaction
+Exec = /usr/local/lib/auth-prompts/check

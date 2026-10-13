@@ -1,0 +1,27 @@
+#!/bin/sh
+# Toggle the idle timer off, for streaming and anything else that watches the
+# screen without touching the keyboard.
+#
+# hypridle 0.1.8 has no pause command, but general:ignore_systemd_inhibit
+# defaults to false, so it honours a logind idle inhibitor: with one held it
+# logs "Ignoring from onIdled()" and never runs its lock or DPMS rules. Holding
+# one is therefore the whole toggle - hypridle.conf stays untouched and the
+# normal timeouts come back the moment the inhibitor is released.
+#
+# The inhibitor is a plain `systemd-inhibit ... sleep infinity`, found again by
+# its --who tag rather than by a pid file, so the state cannot go stale. Killing
+# systemd-inhibit takes the sleep with it (it forks the child with a death
+# signal and closes the inherited fds), which is what releases the lock.
+#
+# Note the tag is matched against full command lines: never write the pattern
+# into an interactive shell command, or pkill matches that shell too.
+
+WHO=hypridle-toggle
+
+if pkill -u "$(id -u)" -f "systemd-inhibit --what=idle --who=$WHO"; then
+	qs ipc call osd message "󰌾" "Auto-lock on"
+else
+	setsid systemd-inhibit --what=idle --who="$WHO" --why="Screen kept awake on request" \
+		--mode=block sleep infinity >/dev/null 2>&1 &
+	qs ipc call osd message "󰅶" "Auto-lock off"
+fi

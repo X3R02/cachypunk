@@ -1,0 +1,13 @@
+[Unit]
+Description=Keep Wayland clipboard content alive after the source app closes
+After=graphical-session.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/wl-clip-persist --clipboard both
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=default.target

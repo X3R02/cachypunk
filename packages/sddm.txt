@@ -1,0 +1,2 @@
+# Optional module "sddm": the login screen, styled as the lock screen
+sddm

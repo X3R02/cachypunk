@@ -1,0 +1,2 @@
+# Optional module "fingerprint": fingerprint login for sudo, polkit and hyprlock
+fprintd

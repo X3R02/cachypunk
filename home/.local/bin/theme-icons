@@ -1,0 +1,176 @@
+#!/usr/bin/env python3
+"""Build the NightCity icon theme: folders and file types drawn as the
+desktop's cards, everything else inherited from Adwaita.
+
+The icons follow the card shape of DESIGN-SYSTEM.md: square corners, a 45-degree
+cut at the bottom-right, a tab stepping down on the top edge. Flat colours
+from the current theme, no gradients:
+  folder    the card silhouette filled with `structure`; special folders carry
+            a short caps label (DOC, IMG, ...) in `bg`
+  file      a portrait card in `structure` at 12% over `bg`, framed in
+            `structure`, with the type as a caps label (TXT, PDF, VID, ...)
+  drop      a folder ready to take a drop is filled with `accent`
+theme-set runs it, so the icons follow a theme switch.
+
+Usage: theme-icons <theme.json>
+"""
+import json
+import pathlib
+import shutil
+import sys
+
+TARGET = pathlib.Path.home() / ".local/share/icons/NightCity"
+FONT = "Rajdhani"
+
+# Adwaita's place names -> label (None: the bare folder)
+FOLDERS = {
+    "folder": None,
+    "inode-directory": None,
+    "folder-documents": "DOC",
+    "folder-download": "DL",
+    "folder-music": "MUS",
+    "folder-pictures": "IMG",
+    "folder-videos": "VID",
+    "folder-projects": "PRJ",
+    "folder-publicshare": "PUB",
+    "folder-templates": "TPL",
+    "folder-remote": "NET",
+    "user-home": "HOME",
+    "user-desktop": "DESK",
+    "user-bookmarks": "MARK",
+}
+
+# Adwaita's mimetype names (plus two common specific ones) -> label
+FILES = {
+    "text-x-generic": "TXT",
+    "text-x-preview": "TXT",
+    "text-html": "HTML",
+    "text-x-script": "SH",
+    "image-x-generic": "IMG",
+    "video-x-generic": "VID",
+    "audio-x-generic": "AUD",
+    "font-x-generic": "FONT",
+    "model": "3D",
+    "package-x-generic": "PKG",
+    "x-package-repository": "REPO",
+    "application-zip": "ZIP",
+    "application-pdf": "PDF",
+    "application-x-executable": "EXE",
+    "application-x-sharedlib": "LIB",
+    "application-x-generic": "BIN",
+    "application-x-addon": "ADD",
+    "application-x-firmware": "FW",
+    "application-certificate": "CERT",
+    "inode-symlink": "LINK",
+    "x-office-document": "DOC",
+    "x-office-document-template": "DOT",
+    "x-office-spreadsheet": "SHEET",
+    "x-office-spreadsheet-template": "SHEET",
+    "x-office-presentation": "SLIDE",
+    "x-office-presentation-template": "SLIDE",
+    "x-office-drawing": "DRAW",
+    "x-office-addressbook": "CARD",
+    "network-server": "SRV",
+    "network-workgroup": "NET",
+}
+
+# 128-unit canvas. Folder: tab on the top-left stepping down at 45 degrees,
+# the body's bottom-right corner cut. File: a portrait card with the same marks.
+FOLDER_PATH = "M8 20 H50 L60 30 H120 V100 L108 112 H8 Z"
+FILE_PATH = "M26 8 H62 L68 14 H102 V104 L88 118 H26 Z"
+
+
+def rgb(hex_colour):
+    h = hex_colour.lstrip("#")
+    return tuple(int(h[i:i + 2], 16) for i in (0, 2, 4))
+
+
+def mix(a, b, t):
+    """Blend colour a towards colour b by t (0..1), as a hex string."""
+    a, b = rgb(a), rgb(b)
+    return "#%02x%02x%02x" % tuple(round(x + (y - x) * t) for x, y in zip(a, b))
+
+
+def label(text, x, y, colour):
+    if not text:
+        return ""
+    # Fit the width: short tags big, five letters smaller
+    size = {1: 40, 2: 38, 3: 34, 4: 28}.get(len(text), 23)
+    return (f'<text x="{x}" y="{y + size * 0.35:.1f}" text-anchor="middle" '
+            f'font-family="{FONT}" font-weight="600" font-size="{size}" '
+            f'letter-spacing="1" fill="{colour}">{text}</text>')
+
+
+def svg(body):
+    return ('<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" '
+            f'viewBox="0 0 128 128">{body}</svg>\n')
+
+
+def folder(fill, text, ink):
+    return svg(f'<path d="{FOLDER_PATH}" fill="{fill}"/>' + label(text, 64, 72, ink))
+
+
+def trash(fill, ink):
+    # A bin in the same terms: lid, handle and a body with the cut corner
+    return svg(
+        f'<path d="M54 12 H74 V20 H54 Z" fill="{fill}"/>'
+        f'<path d="M26 22 H102 V32 H26 Z" fill="{fill}"/>'
+        f'<path d="M34 38 H94 V102 L84 112 H34 Z" fill="{fill}"/>'
+        + "".join(f'<path d="M{x} 50 H{x + 4} V100 H{x} Z" fill="{ink}"/>' for x in (50, 62, 74))
+    )
+
+
+def file_card(face, frame, text):
+    return svg(f'<path d="{FILE_PATH}" fill="{face}" stroke="{frame}" stroke-width="4" '
+               'stroke-linejoin="miter"/>' + label(text, 64, 70, frame))
+
+
+def main():
+    theme = json.load(open(sys.argv[1]))["theme"]
+    structure, bg, accent = theme["structure"], theme["bg"], theme["accent"]
+
+    # Start clean: a name dropped from the tables above must not linger
+    for sub in ("scalable/places", "scalable/mimetypes"):
+        shutil.rmtree(TARGET / sub, ignore_errors=True)
+        (TARGET / sub).mkdir(parents=True)
+
+    places = TARGET / "scalable/places"
+    for name, text in FOLDERS.items():
+        (places / f"{name}.svg").write_text(folder(structure, text, bg))
+    (places / "folder-drag-accept.svg").write_text(folder(accent, None, bg))
+    (places / "user-trash.svg").write_text(trash(structure, bg))
+
+    mimetypes = TARGET / "scalable/mimetypes"
+    face = mix(bg, structure, 0.12)
+    for name, text in FILES.items():
+        (mimetypes / f"{name}.svg").write_text(file_card(face, structure, text))
+
+    (TARGET / "index.theme").write_text(
+        "[Icon Theme]\n"
+        "Name=NightCity\n"
+        "Comment=Folders and file types as the desktop's cards (theme-icons)\n"
+        "Inherits=Adwaita,hicolor\n"
+        "Directories=scalable/places,scalable/mimetypes\n"
+        "\n"
+        "[scalable/places]\n"
+        "Context=Places\n"
+        "Size=128\n"
+        "MinSize=8\n"
+        "MaxSize=512\n"
+        "Type=Scalable\n"
+        "\n"
+        "[scalable/mimetypes]\n"
+        "Context=MimeTypes\n"
+        "Size=128\n"
+        "MinSize=8\n"
+        "MaxSize=512\n"
+        "Type=Scalable\n"
+    )
+    # GTK caches icon lookups per theme dir; drop a stale cache if one exists
+    cache = TARGET / "icon-theme.cache"
+    if cache.exists():
+        cache.unlink()
+
+
+if __name__ == "__main__":
+    main()

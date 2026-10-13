@@ -1,0 +1,16 @@
+#%PAM-1.0
+# Installed by ~/.config/auth-prompts/install.sh over the stock /etc/pam.d/sudo.
+# Fingerprint first: on success the next line prints the ACCESS GRANTED panel
+# and ends auth (the script always exits 0); on any failure it is skipped and
+# the password path runs. A failed password dies inside system-auth
+# (pam_faillock authfail), so the last auth line only runs on success.
+# Both fingerprint lines carry chwd's tag: removing the fprint profile deletes
+# every tagged line, and the pam_exec line must never be left alone, since on
+# its own it would grant access without any check.
+auth		[success=ignore default=1]	pam_fprintd.so # chwd-fprintd
+auth		sufficient	pam_exec.so quiet stdout /usr/local/lib/auth-prompts/granted fingerprint # chwd-fprintd
+auth		include		system-auth
+auth		optional	pam_exec.so quiet stdout /usr/local/lib/auth-prompts/granted password
+account		include		system-auth
+session		include		system-auth
+session		optional	pam_systemd.so class=none

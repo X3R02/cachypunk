@@ -1,0 +1,12 @@
+# Overrides on top of /etc/xdg/walker/config.toml, which walker merges in.
+theme = "matugen"          # rendered by matugen into themes/matugen/ (theme-set)
+close_when_open = true     # the launcher bind toggles
+click_to_close = true
+selection_wrap = true
+
+[placeholders]
+"default" = { input = "Search", list = "No results" }
+"clipboard" = { input = "Clipboard", list = "Clipboard is empty" }
+"symbols" = { input = "Emoji", list = "No results" }
+"windows" = { input = "Window", list = "No windows" }
+"files" = { input = "File", list = "No results" }

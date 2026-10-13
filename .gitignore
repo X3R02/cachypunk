@@ -1,0 +1,16 @@
+# Files theme-set and the installers generate inside linked directories.
+# They follow the active theme, so tracking them would turn every theme
+# switch into a diff.
+home/.config/hypr/hyprtoolkit.conf
+home/.config/hypr/hyprlock-wallpaper.conf
+home/.config/quickshell/Colors.qml
+home/.config/walker/themes/
+home/.config/matugen/current
+home/.config/auth-prompts/fprintd.po
+home/.config/auth-prompts/sudoers.po
+home/.config/auth-prompts/granted
+home/.config/auth-prompts/msgids-*
+
+# Editor and backup leftovers
+*.bak*
+__pycache__/

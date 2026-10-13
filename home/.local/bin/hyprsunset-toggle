@@ -1,0 +1,20 @@
+#!/bin/sh
+# Toggle the blue-light filter at 4000K.
+#
+# hyprsunset 0.4 has no toggle command, and `hyprctl hyprsunset temperature`
+# reports the last temperature that was *set* rather than whether the filter is
+# currently applied — it keeps returning 4000 even after `identity`. The on/off
+# state is therefore tracked here with a flag file.
+
+STATE="$XDG_RUNTIME_DIR/hyprsunset.on"
+TEMP=4000
+
+if [ -e "$STATE" ]; then
+	hyprctl hyprsunset identity >/dev/null
+	rm -f "$STATE"
+	qs ipc call osd message "󰖨" "Night light off"
+else
+	hyprctl hyprsunset temperature "$TEMP" >/dev/null
+	touch "$STATE"
+	qs ipc call osd message "󰖔" "Night light on"
+fi
