@@ -5,6 +5,8 @@ one 45° cut corner, a coral frame for labels, cyan for data, Rajdhani
 everywhere. One palette drives every app, and the whole desktop installs and
 updates from this repo.
 
+![The desktop: Quickshell bar over the wallpaper](docs/screenshots/desktop.jpg)
+
 What you get:
 
 - **Quickshell** as the only shell: bar, keyboard-driven panels (network,
@@ -17,6 +19,25 @@ What you get:
 - An icon theme drawn from the same cards (folders and file types as labelled
   cards), a lock screen and login screen that match, and optionally sudo's
   fingerprint/password prompt redrawn as a panel in the terminal.
+
+## Screenshots
+
+**Launcher** (walker): the same card as every popup, at medium prominence.
+
+![walker launcher](docs/screenshots/launcher.jpg)
+
+**Panels**, one per bar segment, driven from the keyboard: media (`SUPER + M`),
+audio, battery and power profiles, session.
+
+![Media, audio, battery and power panels](docs/screenshots/panels.png)
+
+**Notifications and OSD**, drawn by Quickshell as well.
+
+![A notification and the brightness OSD](docs/screenshots/notifications.png)
+
+**Theme switcher** (`SUPER + CTRL + T`): every theme previews in its own colours.
+
+![Theme switcher](docs/screenshots/theme-switcher.jpg)
 
 ## Install
 
@@ -128,4 +149,6 @@ examples/user.lua  the per-machine settings, documented
 - The Neovim config starts from the LazyVim starter (Apache 2.0, see
   `home/.config/nvim/LICENSE`).
 - Cyberpunk 2077 and its UI are CD PROJEKT RED's. This is a fan-made desktop
-  theme; it ships none of their assets.
+  theme; it ships none of their assets. The wallpaper in the screenshots is
+  the author's own and is not included: a fresh install draws one from the
+  palette, or uses yours from `~/.config/cachypunk/wallpapers/`.
