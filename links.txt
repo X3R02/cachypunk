@@ -15,6 +15,7 @@
 .config/nvim
 .config/environment.d/10-qt.conf
 .config/fontconfig/fonts.conf
+.config/fastfetch/logo.txt
 .config/gtk-3.0/settings.ini
 .config/systemd/user/wl-clip-persist.service
 
