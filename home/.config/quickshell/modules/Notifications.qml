@@ -3,7 +3,9 @@
 // disturb switch, the latest notifications as cards (the game's journal: app
 // and age as the label, the title, the body under it) and "Clear all" as the
 // last row. There is no "Advanced": the history lives here and nowhere else.
-// Opening the panel marks everything read.
+// Opening the panel marks everything read. Each card is an entry: Enter or a
+// click runs its action while its app still listens (else focuses the app's
+// window), Delete or a right-click twice removes it.
 import Quickshell
 import QtQuick
 import qs
@@ -21,6 +23,8 @@ Module {
 	readonly property int shown: 6
 	// Bumped every 30 s while the panel is open, so the ages stay current
 	property int tick: 0
+	// Key of the card whose first Delete is waiting for a second
+	property string armedRemove: ""
 
 	function age(time: real): string {
 		void mod.tick;
@@ -55,9 +59,12 @@ Module {
 		barWindow: mod.barWindow
 		key: mod.key
 
-		onOpenChanged: if (open) {
-			mod.tick++;
-			Notifs.markRead();
+		onOpenChanged: {
+			mod.armedRemove = "";
+			if (open) {
+				mod.tick++;
+				Notifs.markRead();
+			}
 		}
 
 		PanelButton {
@@ -87,21 +94,66 @@ Module {
 			spacing: 6
 
 			Repeater {
-				model: Notifs.history.slice(0, mod.shown)
+				// Matched by key, so a new notification doesn't rebuild the
+				// cards and the cursor stays where it was
+				model: ScriptModel {
+					values: Notifs.history.slice(0, mod.shown)
+					objectProp: "key"
+				}
 
+				// A panel entry: Enter or a click runs the notification's
+				// action (or focuses its app), Delete twice removes it
 				Item {
 					id: card
 
 					required property var modelData
 
+					readonly property bool navigable: true
+					readonly property var panelWindow: QsWindow.window
+					readonly property bool hovered: panelWindow?.keyboardNav ? panelWindow.cursor === card : mouse.containsMouse
+					readonly property bool armed: mod.armedRemove !== "" && mod.armedRemove === (modelData?.key ?? "")
+
+					function activate(): void {
+						states.flash();
+						Panels.close(mod.key);
+						Notifs.activate(modelData);
+					}
+
+					function secondary(): void {
+						if (!armed) {
+							mod.armedRemove = modelData?.key ?? "";
+							return;
+						}
+						mod.armedRemove = "";
+						Notifs.remove(modelData);
+					}
+
 					width: Theme.panelWidth
 					height: text.implicitHeight + 16
 
+					EntryFrame {
+						id: states
+
+						focused: card.hovered
+					}
+
+					// A critical one keeps its alert frame at rest
 					NotchRect {
+						visible: (card.modelData?.critical ?? false) && !card.hovered
 						anchors.fill: parent
 						notch: Theme.notchSmall
 						fillColor: "transparent"
-						strokeColor: (card.modelData?.critical ?? false) ? Colors.alert : Qt.rgba(Colors.structure.r, Colors.structure.g, Colors.structure.b, Theme.idleStroke)
+						strokeColor: Colors.alert
+					}
+
+					MouseArea {
+						id: mouse
+
+						anchors.fill: parent
+						hoverEnabled: true
+						acceptedButtons: Qt.LeftButton | Qt.RightButton
+						onEntered: card.panelWindow?.takeCursor(card)
+						onClicked: m => m.button === Qt.RightButton ? card.secondary() : card.activate()
 					}
 
 					Column {
@@ -125,10 +177,18 @@ Module {
 								color: (card.modelData?.critical ?? false) ? Colors.alert : Colors.structure
 							}
 							BarText {
+								visible: !card.armed
 								anchors.right: parent.right
 								caps: false
 								text: mod.age(card.modelData?.time ?? Date.now())
 								color: Colors.accent
+							}
+							Chip {
+								visible: card.armed
+								anchors.right: parent.right
+								anchors.verticalCenter: parent.verticalCenter
+								text: "Again to remove"
+								tone: Colors.alert
 							}
 						}
 						BarText {

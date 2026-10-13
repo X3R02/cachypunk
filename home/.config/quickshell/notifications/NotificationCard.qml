@@ -24,7 +24,7 @@ Item {
 	Timer {
 		running: Notifs.timeout(card.n) > 0 && !mouse.containsMouse
 		interval: Notifs.timeout(card.n)
-		onTriggered: card.n.expire()
+		onTriggered: Notifs.hide(card.n)
 	}
 
 	MouseArea {

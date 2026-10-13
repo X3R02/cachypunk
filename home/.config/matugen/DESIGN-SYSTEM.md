@@ -179,7 +179,9 @@ One set of states for every entry (`EntryFrame.qml`), from CDPR's guide:
   privacy segment would teach the eye to skip it.
 - **Notifications keep a journal**: every notification is recorded (the last
   50) even under Do not disturb, which only suppresses the card; critical
-  ones always show. Opening the panel marks them read.
+  ones always show. Opening the panel marks them read. A card that times
+  out is hidden, not closed, so each history entry still runs its app's
+  action (or focuses the app's window when it has none).
 - **Advanced is the escape hatch**: every panel ends in one row that opens
   the full tool (nm-connection-editor, bluetui, wiremix). A TUI is never a
   panel's main path.
