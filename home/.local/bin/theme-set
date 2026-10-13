@@ -29,6 +29,17 @@ matugen -q -c "$dir/config.toml" color hex "$accent" --import-json "$theme" || e
 # Templates can't know the home directory; walker's CSS needs absolute paths
 # to its SVG pieces, so its template carries @HOME@ in their place
 sed -i "s#@HOME@#$HOME#g" "$HOME/.config/walker/themes/matugen/style.css"
+# Templates only get hex; a raw ANSI escape needs "r;g;b". A template writes
+# @RGB:<key>@ (any key of the palette) and gets the decimal triple here
+for f in "$HOME/.config/fastfetch/config.jsonc"; do
+	[ -f "$f" ] || continue
+	for key in $(grep -o '@RGB:[a-z0-9_]*@' "$f" | sort -u | sed 's/@RGB:\(.*\)@/\1/'); do
+		hex=$(jq -r --arg k "$key" '.theme[$k] // empty' "$theme")
+		hex=${hex#\#}
+		[ ${#hex} = 6 ] || continue
+		sed -i "s/@RGB:$key@/$((16#${hex:0:2}));$((16#${hex:2:2}));$((16#${hex:4:2}))/g" "$f"
+	done
+done
 echo "$name" >"$dir/current"
 
 # The wallpaper is part of the theme. hypr-wallpaper-apply resolves this link.
