@@ -15,6 +15,8 @@ Item {
 	property bool enabled: true
 	// Buttons in one row: "left" for the first, "none" between, "right" last
 	property string cut: "right"
+	// The panel opens with its cursor here instead of on the first entry
+	property bool preferred: false
 
 	readonly property bool navigable: true
 	readonly property var panelWindow: QsWindow.window

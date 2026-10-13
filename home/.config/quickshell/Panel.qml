@@ -13,7 +13,8 @@
 // (optionally `adjust(step)` and `secondary()`); it reads
 // `QsWindow.window.cursor === this` to draw itself selected and calls
 // `takeCursor(this)` on hover, so mouse and keyboard share one cursor.
-// PanelButton, PanelRow and PanelSlider are the stock entries.
+// PanelButton, PanelRow and PanelSlider are the stock entries. On open the
+// cursor starts on the entry marked `preferred: true`, else on the first.
 import Quickshell
 import Quickshell.Wayland
 import QtQuick
@@ -67,11 +68,20 @@ PanelWindow {
 		keys.forceActiveFocus();
 	}
 
+	// Where the cursor starts: the entry marked `preferred: true` (media's
+	// play/pause), else the first one from the top
+	function placeCursor(): void {
+		const list = entries();
+		cursor = list.find(e => e.preferred === true) ?? list[0] ?? null;
+	}
+
 	onOpenChanged: {
 		cursor = null;
 		if (open) {
 			targetX = target.mapToItem(null, 0, 0).x;
 			keys.forceActiveFocus();
+			// After this frame: entries bound to the panel's visibility exist then
+			Qt.callLater(placeCursor);
 		}
 	}
 

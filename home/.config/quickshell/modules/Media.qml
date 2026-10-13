@@ -153,6 +153,7 @@ Module {
 			PanelButton {
 				icon: mod.playing ? "󰏤" : "󰐊"
 				cut: "none"
+				preferred: true
 				enabled: mod.player?.canTogglePlaying ?? false
 				onClicked: mod.player.togglePlaying()
 			}

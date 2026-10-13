@@ -124,6 +124,20 @@ link_all() {
 	else
 		say "Links: $linked created"
 	fi
+	[ "$linked" -gt 0 ] && restart_shell
+	return 0
+}
+
+# A running Quickshell keeps watching the directory it started from, so after
+# ~/.config/quickshell is replaced by a link it would never see the repo's
+# files. Restart it through Hyprland so it detaches from this terminal
+restart_shell() {
+	pgrep -x qs >/dev/null || return 0
+	command -v hyprctl >/dev/null || return 0
+	say "Restarting Quickshell so it reads the linked config"
+	pkill -x qs
+	sleep 0.5
+	hyprctl eval 'hl.exec_cmd("qs")' >/dev/null 2>&1 || true
 }
 
 # Files that need this machine's $HOME written into them. Qt's colour-scheme

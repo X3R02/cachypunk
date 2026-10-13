@@ -164,6 +164,9 @@ One set of states for every entry (`EntryFrame.qml`), from CDPR's guide:
 - **Keyboard first.** Every surface that takes input works without a mouse:
   Up/Down (j/k, Tab) move, Enter/Space activate, Left/Right (h/l) adjust or
   move sideways, Delete is the secondary action, Escape closes or goes back.
+- **A panel opens with its cursor placed**: on the entry marked
+  `preferred: true` when there is an obvious first action (media: play/pause),
+  otherwise on the first entry from the top. Never on nothing.
 - **Destructive actions confirm** in a modal (log out, restart, shut down)
   with BACK focused by default. Reversible actions don't (lock, suspend).
 - **Forgetting or removing an item** takes a second press of the secondary
