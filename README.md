@@ -10,8 +10,10 @@ updates from this repo.
 What you get:
 
 - **Quickshell** as the only shell: bar, keyboard-driven panels (network,
-  bluetooth, audio, battery, media, power), OSD, notifications, the wallpaper
-  and the polkit agent.
+  bluetooth, audio, battery, media, system, notifications with history and
+  Do not disturb, power), privacy indicators that appear only while the mic,
+  camera or screen are in use, OSD, notifications, the wallpaper and the
+  polkit agent.
 - **walker + elephant** as the launcher, clipboard, file search and emoji picker.
 - **matugen** with fixed palettes (`nightcity`, `militech`): `theme-set <name>`
   re-renders Hyprland, Quickshell, walker, GTK 3/4, Qt 5/6, ghostty, Neovim,

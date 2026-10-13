@@ -55,6 +55,9 @@ k.super("K", hl.dsp.exec_cmd("hypr-keybinds"), "Keybinding cheatsheet")
 -- settings, this is something you summon, like the launcher
 k.super("M", progs.panel("media"), "Media player")
 
+-- The notification history, with the Do not disturb switch at its top
+k.super("N", progs.panel("notifications"), "Notifications")
+
 -- One bind per app, keyed by the letter in programs.apps.
 for key, app in pairs(progs.apps) do
 	k.super(key, progs.launch(app.desktop), app.name)

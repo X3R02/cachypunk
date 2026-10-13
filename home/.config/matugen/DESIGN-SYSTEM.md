@@ -173,6 +173,13 @@ One set of states for every entry (`EntryFrame.qml`), from CDPR's guide:
   action, with its chip switching to "AGAIN TO …" in `alert`.
 - **Show an input only when it can be used.** Waiting states (fingerprint,
   scanning) show what is happening, not a disabled field.
+- **Privacy shows only while it matters**: the microphone, camera and
+  screen-share icons appear in `alert` only while something uses them, with
+  the apps named in the tooltip, and take no room otherwise. A permanent
+  privacy segment would teach the eye to skip it.
+- **Notifications keep a journal**: every notification is recorded (the last
+  50) even under Do not disturb, which only suppresses the card; critical
+  ones always show. Opening the panel marks them read.
 - **Advanced is the escape hatch**: every panel ends in one row that opens
   the full tool (nm-connection-editor, bluetui, wiremix). A TUI is never a
   panel's main path.

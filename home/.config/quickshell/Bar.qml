@@ -68,6 +68,7 @@ PanelWindow {
 			height: parent.height
 			spacing: Theme.moduleSpacing
 
+			Privacy {}
 			Tray {
 				barWindow: bar
 			}
@@ -75,7 +76,10 @@ PanelWindow {
 				barWindow: bar
 				screenName: bar.modelData.name
 			}
-			Cpu {}
+			Cpu {
+				barWindow: bar
+				screenName: bar.modelData.name
+			}
 			Network {
 				barWindow: bar
 				screenName: bar.modelData.name
@@ -89,6 +93,10 @@ PanelWindow {
 				screenName: bar.modelData.name
 			}
 			Battery {
+				barWindow: bar
+				screenName: bar.modelData.name
+			}
+			Notifications {
 				barWindow: bar
 				screenName: bar.modelData.name
 			}

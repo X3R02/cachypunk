@@ -101,12 +101,17 @@ ShellRoot {
 		}
 	}
 
-	// `qs ipc call notifications dismiss` clears every popup
+	// `qs ipc call notifications dismiss` clears every popup;
+	// `qs ipc call notifications dnd` switches Do not disturb
 	IpcHandler {
 		target: "notifications"
 
 		function dismiss(): void {
 			Notifs.dismissAll();
+		}
+
+		function dnd(): void {
+			Notifs.setDnd(!Notifs.dnd);
 		}
 	}
 
