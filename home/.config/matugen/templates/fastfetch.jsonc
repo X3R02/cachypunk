@@ -68,7 +68,7 @@
     },
     {
       "type": "battery",
-      "key": "└ └󰁹 BATTERY"
+      "key": "│ └󰁹 BATTERY"
     },
     {
       "type": "custom",
@@ -105,7 +105,7 @@
     },
     {
       "type": "command",
-      "key": "└ └󰸌 THEME",
+      "key": "│ └󰸌 THEME",
       "text": "printf '%s  \u001b[38;2;@RGB:structure@m● \u001b[38;2;@RGB:accent@m● \u001b[38;2;@RGB:green@m● \u001b[38;2;@RGB:yellow@m● \u001b[38;2;@RGB:accent2@m● \u001b[38;2;@RGB:blue@m● \u001b[38;2;@RGB:magenta@m●\u001b[0m' \"$(cat ~/.config/matugen/current 2>/dev/null)\""
     },
     {
@@ -123,7 +123,7 @@
     },
     {
       "type": "command",
-      "key": "└ └󱦟 OS AGE",
+      "key": "│ └󱦟 OS AGE",
       "text": "echo $(( ($(date +%s) - $(stat -c %W /)) / 86400 )) days"
     },
     {
