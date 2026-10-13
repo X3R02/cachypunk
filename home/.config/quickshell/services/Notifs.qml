@@ -9,6 +9,8 @@
 // alive for its app, so its action (open the chat, go to the tab) still works
 // from the history. Only the history's 50 stay alive; older ones are closed.
 // When one has no action left, activating it focuses its app's window.
+// Acting on a notification (from its card or the history) settles it: it is
+// closed and leaves the history.
 pragma Singleton
 
 import Quickshell
@@ -64,12 +66,12 @@ Singleton {
 		persist.hidden = "{}";
 	}
 
-	function find(id: int) {
+	function find(id: int): var {
 		return live.find(n => n.id === id) ?? null;
 	}
 
 	// Take the card away but keep the notification open for its app
-	function hide(n): void {
+	function hide(n: var): void {
 		const next = {};
 		for (const other of live)
 			if (hidden[other.id])
@@ -79,24 +81,23 @@ Singleton {
 	}
 
 	// The window of the app an entry came from
-	function focusApp(entry): void {
+	function focusApp(entry: var): void {
 		Quickshell.execDetached([Quickshell.shellDir + "/scripts/focus-app.sh", entry.desktop ?? "", entry.app ?? ""]);
 	}
 
 	// From the history: the notification's own action while it is alive,
-	// else its app's window
-	function activate(entry): void {
+	// else its app's window. Acting on it settles it, so it leaves the history
+	function activate(entry: var): void {
 		const n = find(entry.id);
 		const action = n ? defaultAction(n) : null;
-		if (action) {
+		if (action)
 			action.invoke();
-			hide(n);
-		} else {
+		else
 			focusApp(entry);
-		}
+		remove(entry);
 	}
 
-	function remove(entry): void {
+	function remove(entry: var): void {
 		const n = find(entry.id);
 		if (n)
 			n.dismiss();
@@ -108,7 +109,7 @@ Singleton {
 		return text.replace(/<[^>]*>/g, "").replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").trim();
 	}
 
-	function record(n): void {
+	function record(n: var): void {
 		const now = Date.now();
 		const entry = {
 			// Stable identity for the panel's list, so the cursor survives
@@ -132,25 +133,27 @@ Singleton {
 		persist.unread += 1;
 	}
 
-	function timeout(n): int {
+	function timeout(n: var): int {
 		if (n.urgency === NotificationUrgency.Critical)
 			return 0;
 		return n.expireTimeout > 0 ? n.expireTimeout : defaultTimeout;
 	}
 
 	// The action a click on the card runs: the sender's "default" if it has one
-	function defaultAction(n) {
+	function defaultAction(n: var): var {
 		return n.actions.find(a => a.identifier === "default") ?? null;
 	}
 
-	// A click on a card: the default action, else the app's window
-	function click(n): void {
+	// A click on a card: the default action, else the app's window. Acted
+	// on, it is settled: closed and taken out of the history too
+	function click(n: var): void {
 		const action = defaultAction(n);
 		if (action)
 			action.invoke();
 		else
 			focusApp({ desktop: n.desktopEntry, app: n.appName });
-		hide(n);
+		persist.history = JSON.stringify(history.filter(e => e.id !== n.id));
+		n.dismiss();
 	}
 
 	// Clears the cards; the notifications stay in the history, still usable
