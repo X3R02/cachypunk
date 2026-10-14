@@ -69,9 +69,6 @@ PanelWindow {
 			spacing: Theme.moduleSpacing
 
 			Privacy {}
-			Tray {
-				barWindow: bar
-			}
 			Agents {
 				barWindow: bar
 				screenName: bar.modelData.name
@@ -92,11 +89,14 @@ PanelWindow {
 				barWindow: bar
 				screenName: bar.modelData.name
 			}
-			Notifications {
+			Tray {
+				barWindow: bar
+			}
+			Cpu {
 				barWindow: bar
 				screenName: bar.modelData.name
 			}
-			Cpu {
+			Notifications {
 				barWindow: bar
 				screenName: bar.modelData.name
 			}
