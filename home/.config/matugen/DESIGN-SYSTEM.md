@@ -119,10 +119,14 @@ Nesting rules:
   45°); every tab is equally wide at mid height, glyph centred there.
   Tried and rejected (2026-10-14): 45° diagonals between tabs, straight
   vertical dividers, and separate tabs with a gap.
-  Each tab holds a glyph only (the item is named in the content below);
-  the current one takes the active state (stroke 100%, 40% fill, `fg`
-  glyph) and is left open at the bottom, joined to the body like a folder,
-  while the others are closed off by a `line` stroke. Use tabs when a panel
+  Each tab holds a glyph only (the item is named in the content below).
+  Tabs break the entry states on purpose: the current tab takes **no
+  fill** — it keeps the card's dark backing and an open floor, joined to
+  the body like a folder, so tab and content read as one surface — and is
+  told apart only by its glyph in `accent`, the others `muted` and closed
+  off by a `line` stroke. Focus lights a tab's edges in `structure`
+  without a fill. A filled current tab was tried and rejected
+  (2026-10-14): it split the tab from the content. Use tabs when a panel
   would otherwise repeat the same block once per item (agents, accounts):
   only the current tab's content is drawn, so the panel keeps one height
   however many items there are. Whatever sits below (Refresh, Advanced)

@@ -9,9 +9,12 @@
 // edge: the dividers, the line that closes each tab off from the body (left
 // open under the current tab, like a folder), the state planes and the icons.
 //
-// Every tab is a panel entry (navigable, activate, adjust): its states are
-// EntryFrame's - idle; focused (cursor) stroke 100% + 10% fill; current
-// stroke 100% + 40% fill; 70% flash on activation. Panel walks this strip
+// Every tab is a panel entry (navigable, activate, adjust). Unlike other
+// entries, the current tab takes no fill: it keeps the card's dark backing
+// and an open floor, so tab and content read as one surface, and it is told
+// apart only by its glyph in `accent` while the others are `muted`. Focus
+// (the cursor) lights the tab's edges in `structure`, without a fill; an
+// activation still flashes 70%. Panel walks this strip
 // before the body, so the tabs come first under Up/Down, and pages it with
 // Q / E. Paging with the cursor on a tab carries the cursor along.
 import Quickshell
@@ -82,8 +85,8 @@ Item {
 			readonly property bool preferred: current
 			readonly property bool hovered: strip.panelWindow?.keyboardNav ? strip.panelWindow.cursor === tab : mouse.containsMouse
 			property bool flashing: false
-			readonly property real fill: flashing ? Theme.flashFill : hovered ? Theme.hoverFill : current ? Theme.activeFill : 0
-			readonly property bool lit: hovered || current || flashing
+			readonly property real fill: flashing ? Theme.flashFill : 0
+			readonly property bool lit: hovered || flashing
 
 			readonly property real h: strip.tabHeight
 			// Top corners, and where the sides meet the floor: both sides
@@ -150,8 +153,8 @@ Item {
 					}
 				}
 
-				// Focused or current: the tab's own edges at full strength,
-				// left open at the bottom where it joins the body
+				// Focused: the tab's own edges at full strength, left open at
+				// the bottom
 				ShapePath {
 					strokeColor: tab.lit ? Colors.structure : "transparent"
 					strokeWidth: strip.lw
@@ -170,7 +173,7 @@ Item {
 				x: Math.round(((tab.x0 + tab.b0) / 2 + (tab.x1 + tab.foot) / 2) / 2 - width / 2)
 				y: Math.round((tab.h - height) / 2)
 				text: tab.modelData
-				color: tab.current && !tab.hovered ? Colors.fg : Colors.accent
+				color: tab.current ? Colors.accent : Colors.muted
 			}
 
 			MouseArea {
