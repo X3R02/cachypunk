@@ -33,8 +33,10 @@ Item {
 	property var icons: []
 	property int currentIndex: 0
 	property real tabHeight: 24
-	// Width of every tab, measured at mid height, where the glyph sits
+	// Width of the current tab (always the first slot), measured at mid
+	// height, where the glyph sits; the tabs behind it are a little narrower
 	property real tabWidth: 72
+	property real backWidth: 60
 	// How far a divider runs right while dropping the tab's height: 45
 	// degrees, the card's own cut. A steeper 0.4 x tabHeight was tried; with
 	// the front tab's straight side, 45 reads as the game's card tab
@@ -67,9 +69,10 @@ Item {
 
 	// Where divider i meets the top edge (0 is the card's left side). The
 	// first tab loses half a run at its top, since its left side is
-	// straight, so at mid height it is as wide as the rest
+	// straight, so at mid height it measures tabWidth; each later tab adds
+	// backWidth
 	function topX(i: int): real {
-		return i === 0 ? 0 : i * tabWidth - run / 2;
+		return i === 0 ? 0 : tabWidth + (i - 1) * backWidth - run / 2;
 	}
 
 	width: topX(count) + run

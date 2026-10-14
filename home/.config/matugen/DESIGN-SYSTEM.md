@@ -119,7 +119,8 @@ Nesting rules:
   with the card's straight left edge, and the others follow in order behind
   it, wrapping. Changing tab rotates the glyphs; the tab shapes stay put
   and the content slides in from the side it was paged towards.
-  Every tab is equally wide at mid height, glyph centred there.
+  At mid height the current tab is 72 px wide and the tabs behind it a
+  little narrower (60 px), each glyph centred there.
   Tried and rejected (2026-10-14): every divider leaning (the current tab
   sat between two slants), the current tab standing in place in the row
   (superseded by the carousel), straight vertical dividers everywhere, separate
