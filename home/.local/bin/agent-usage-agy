@@ -10,7 +10,8 @@ report: one group per model family (Gemini; Claude and GPT), each with a
 5-hour and a weekly bucket. It answers locally from the signed-in account,
 starts no conversation and spends no quota. The OAuth token is never read
 here; its file only has to exist, so a signed-out agy is reported as
-`ready: false` (hidden) instead of being launched into a browser sign-in.
+an empty `ready: false` record (hidden by the runner) instead of being
+launched into a browser sign-in.
 
 Prompt counts come from agy's own history.jsonl (slash commands excluded).
 agy reports no token counts, so todayTotalTokens stays 0.

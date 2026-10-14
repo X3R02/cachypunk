@@ -31,5 +31,9 @@
 .local/bin/agent-usage
 .local/bin/agent-usage-claude
 .local/bin/agent-usage-agy
+.local/bin/agent-usage-codex
+.local/bin/agent-usage-fireworks
+.local/bin/agent-usage-grok
+.local/bin/agent-usage-kimi
 
 .local/share/fonts/Rajdhani

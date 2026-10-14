@@ -7,16 +7,19 @@
 # Quickshell bar. Arguments (--force, --limits-only) are passed to every
 # collector.
 #
-# Detection is the collectors' job: a collector always prints a record, with
-# `"ready": false` when its agent is not installed, signed out or never used,
-# and that record is left out here. So the panel shows a tab for exactly the
-# agents in use, and a new agent appears on its own once it is signed in.
+# Detection follows Omarchy's agents panel (providerHasData in
+# shell/plugins/agents/Main.qml): every collector always prints a record, and
+# only records with some usage are kept - prompts, sessions or active days,
+# limits, accounts, a balance, or a signed-in plan. So the panel shows a tab
+# for exactly the agents in use, and a new agent appears on its own once it
+# has been used or signed in.
 # Only records of collectors present now are printed: removing a collector
 # removes its agent even though its last record stays in the state dir.
 #
 # Same layout as Omarchy's omarchy-agent-usage-update, minus its multi-account
 # handling: adding an agent means dropping in its collector, nothing else.
-# Collectors are vendored from Omarchy (see the header of each).
+# The claude, codex, fireworks, grok and kimi collectors are vendored from
+# Omarchy (see the header of each); agy is this repo's own.
 
 state="${XDG_STATE_HOME:-$HOME/.local/state}/agent-usage"
 mkdir -p "$state"
@@ -49,5 +52,12 @@ done
 if [ ${#agents[@]} -eq 0 ]; then
 	echo "[]"
 else
-	jq -cs 'map(select(.ready != false))' "${agents[@]}"
+	jq -cs 'map(select(
+		(.totalPrompts // 0) > 0 or (.totalSessions // 0) > 0
+		or (.activeDays // 0) > 0 or (.todayPrompts // 0) > 0
+		or (.todaySessions // 0) > 0 or ((.limits // []) | length > 0)
+		or ((.accounts // []) | length > 0)
+		or (.balance | . != null and . != false and . != 0 and . != "")
+		or (.ready == true and (.tierLabel // "") != "")
+	))' "${agents[@]}"
 fi

@@ -147,9 +147,10 @@ examples/user.lua  the per-machine settings, documented
 - The code and config in this repo: MIT, see [LICENSE](LICENSE).
 - Rajdhani (`home/.local/share/fonts/Rajdhani`): Indian Type Foundry, SIL Open
   Font License, see the `OFL.txt` next to it.
-- `agent-usage` and `agent-usage-claude` are vendored from
-  [Omarchy](https://github.com/omacom/omarchy) (MIT); `agent-usage` was since
-  changed to leave out agents not in use. `agent-usage-agy` (Antigravity CLI)
+- `agent-usage` and the claude, codex, fireworks, grok and kimi collectors
+  are vendored from [Omarchy](https://github.com/omacom/omarchy) (MIT);
+  `agent-usage` keeps only agents in use, by the rule of Omarchy's own
+  agents panel. `agent-usage-agy` (Antigravity CLI)
   is this repo's own.
 - The Neovim config starts from the LazyVim starter (Apache 2.0, see
   `home/.config/nvim/LICENSE`).

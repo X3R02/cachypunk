@@ -1,7 +1,7 @@
 // AI agent usage limits. Records come from ~/.local/bin/agent-usage, which runs
-// one collector per agent (agent-usage-<agent>; Claude's vendored from
-// Omarchy) and prints, as JSON, only the agents in use: a collector reports
-// `ready: false` for an agent that is missing, signed out or unused. The only
+// one collector per agent (agent-usage-<agent>; all but agy vendored from
+// Omarchy) and prints, as JSON, only the agents in use, by the rule of
+// Omarchy's agents panel (some prompts, limits, balance or signed-in plan). The only
 // per-agent knowledge here is each one's tab glyph (`icons`, the robot for
 // any other). The bar shows the limit closest to running out across all of
 // them; click opens the panel with one folder tab per agent on the card's
@@ -24,10 +24,12 @@ Module {
 	// The tab shown, kept by agent id so it survives records being reordered
 	// or an agent appearing; falls back to the first tab
 	property string currentId: ""
-	// Tab glyphs from Symbols Nerd Font: codicons' Claude mark; Antigravity
-	// has no glyph of its own, so it takes Gemini's four-point star
+	// Tab glyphs from Symbols Nerd Font: codicons' Claude and OpenAI marks;
+	// Antigravity has none of its own, so it takes Gemini's four-point star.
+	// Grok, Kimi and Fireworks have no glyph and get the robot
 	readonly property var icons: ({
 			"claude": "\uec82",
+			"codex": "\uec81",
 			"agy": "\u{f0ae2}"
 		})
 	readonly property int currentIndex: Math.max(0, records.findIndex(r => r.id === currentId))
