@@ -192,7 +192,8 @@ PanelWindow {
 			x: Math.round(Math.max(0, Math.min(panel.targetX + panel.target.width / 2 - width / 2, keys.width - width)))
 			y: Theme.popupGap
 			tabHeight: tabStrip.visible ? tabStrip.tabHeight : -1
-			tabLength: tabStrip.visible ? tabStrip.count * tabStrip.tabWidth : -1
+			tabLength: tabStrip.visible ? tabStrip.topX(tabStrip.count) : -1
+			tabRun: tabStrip.visible ? tabStrip.run : -1
 
 			Column {
 				id: body

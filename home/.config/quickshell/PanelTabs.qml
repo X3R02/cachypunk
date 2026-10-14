@@ -1,12 +1,13 @@
-// The tabs of a Panel, drawn as the card's own top edge: the card's tab (the
-// raised first stretch of the top edge, Frame/NotchRect) grows into a row of
-// folder tabs, one per icon, all the same width and split by straight
-// dividers; only after the last does the edge step down at 45 degrees, the
-// way the game's cards carry their tab. Panel places this over the Frame and
-// gives the Frame the matching raised edge (`tabLength` = count x tabWidth,
-// `tab` = tabHeight); this item only draws what lies inside that edge: the
-// dividers, the line that closes each tab off from the body (left open under
-// the current tab, like a folder), the state planes and the icons.
+// The tabs of a Panel, drawn as the card's own top edge, like the tabs on a
+// folder icon: the card's tab (the raised first stretch of the top edge,
+// Frame/NotchRect) grows into a row of wide, low tabs, one per icon. Next
+// tabs share one steep divider, and the edge steps down after the last at
+// the same slant - steeper than the card's usual 45 degrees, `run` px across
+// for the tab's full height. Panel places this over the Frame and gives the
+// Frame the matching raised edge (`tabLength` = topX(count), `tab` =
+// tabHeight, `tabRun` = run); this item only draws what lies inside that
+// edge: the dividers, the line that closes each tab off from the body (left
+// open under the current tab, like a folder), the state planes and the icons.
 //
 // Every tab is a panel entry (navigable, activate, adjust): its states are
 // EntryFrame's - idle; focused (cursor) stroke 100% + 10% fill; current
@@ -23,9 +24,10 @@ Item {
 	property var icons: []
 	property int currentIndex: 0
 	property real tabHeight: 24
-	// Clear space either side of each glyph; every tab is the same width
-	property real padding: 10
-	readonly property real tabWidth: 2 * padding + Theme.iconSize + 2
+	// Width of every tab, measured at mid height, where the glyph sits
+	property real tabWidth: 72
+	// How far a divider runs right while dropping the tab's height
+	property real run: Math.round(tabHeight * 0.4)
 
 	readonly property var panelWindow: QsWindow.window
 	readonly property int count: icons.length
@@ -52,7 +54,14 @@ Item {
 		select(currentIndex + n);
 	}
 
-	width: count * tabWidth + tabHeight
+	// Where divider i meets the top edge (0 is the card's left side). The
+	// first tab loses half a run at its top, since its left side is
+	// straight, so at mid height it is as wide as the rest
+	function topX(i: int): real {
+		return i === 0 ? 0 : i * tabWidth - run / 2;
+	}
+
+	width: topX(count) + run
 	height: tabHeight
 
 	Repeater {
@@ -76,12 +85,13 @@ Item {
 			readonly property real fill: flashing ? Theme.flashFill : hovered ? Theme.hoverFill : current ? Theme.activeFill : 0
 			readonly property bool lit: hovered || current || flashing
 
-			readonly property real x0: index * strip.tabWidth
-			readonly property real x1: x0 + strip.tabWidth
-			// Where the right side meets the floor: straight down, or the
-			// 45-degree step after the last tab
-			readonly property real foot: last ? x1 + strip.tabHeight : x1
 			readonly property real h: strip.tabHeight
+			// Top corners, and where the sides meet the floor: both sides
+			// lean by one run, except the first tab's straight left side
+			readonly property real x0: strip.topX(index)
+			readonly property real x1: strip.topX(index + 1)
+			readonly property real b0: index === 0 ? 0 : x0 + strip.run
+			readonly property real foot: x1 + strip.run
 
 			function activate(): void {
 				flashing = true;
@@ -105,9 +115,9 @@ Item {
 			// The line closing the tab off from the body, open when current
 			Rectangle {
 				visible: !tab.current
-				x: tab.x0
+				x: tab.b0
 				y: tab.h
-				width: tab.foot - tab.x0
+				width: tab.foot - tab.b0
 				height: strip.lw
 				color: Colors.line
 				antialiasing: false
@@ -123,7 +133,7 @@ Item {
 					fillColor: Qt.rgba(Colors.structure.r, Colors.structure.g, Colors.structure.b, tab.fill)
 
 					PathPolyline {
-						path: [Qt.point(tab.x0, 0), Qt.point(tab.x1, 0), Qt.point(tab.foot, tab.h), Qt.point(tab.x0, tab.h), Qt.point(tab.x0, 0)]
+						path: [Qt.point(tab.x0, 0), Qt.point(tab.x1, 0), Qt.point(tab.foot, tab.h), Qt.point(tab.b0, tab.h), Qt.point(tab.x0, 0)]
 					}
 				}
 
@@ -136,7 +146,7 @@ Item {
 					capStyle: ShapePath.FlatCap
 
 					PathPolyline {
-						path: [Qt.point(tab.x1, strip.edge), Qt.point(tab.x1, tab.h)]
+						path: [Qt.point(tab.x1, strip.edge), Qt.point(tab.foot, tab.h)]
 					}
 				}
 
@@ -150,13 +160,14 @@ Item {
 					capStyle: ShapePath.FlatCap
 
 					PathPolyline {
-						path: [Qt.point(tab.x0 + strip.edge, tab.h), Qt.point(tab.x0 + strip.edge, strip.edge), Qt.point(tab.x1, strip.edge), Qt.point(tab.foot, tab.h)]
+						path: [Qt.point(tab.b0 + (tab.index === 0 ? strip.edge : 0), tab.h), Qt.point(tab.x0 + (tab.index === 0 ? strip.edge : 0), strip.edge), Qt.point(tab.x1, strip.edge), Qt.point(tab.foot, tab.h)]
 					}
 				}
 			}
 
 			BarIcon {
-				x: Math.round(tab.x0 + (strip.tabWidth - width) / 2)
+				// Centred at mid height, between the sides' midpoints
+				x: Math.round(((tab.x0 + tab.b0) / 2 + (tab.x1 + tab.foot) / 2) / 2 - width / 2)
 				y: Math.round((tab.h - height) / 2)
 				text: tab.modelData
 				color: tab.current && !tab.hovered ? Colors.fg : Colors.accent
@@ -165,8 +176,9 @@ Item {
 			MouseArea {
 				id: mouse
 
-				x: tab.x0
-				width: strip.tabWidth
+				// The stretch the tab owns at mid height
+				x: (tab.x0 + tab.b0) / 2
+				width: (tab.x1 + tab.foot) / 2 - x
 				height: parent.height
 				hoverEnabled: true
 				onEntered: strip.panelWindow?.takeCursor(tab)

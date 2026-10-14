@@ -111,13 +111,14 @@ Nesting rules:
   optional toggle (PanelButton) → headings with their rows and sliders →
   divider → `Advanced` (PanelButton, always last, opens the full tool).
   Nothing else.
-- **PanelTabs** are the card's own tab grown into folder tabs, not a row of
-  buttons: the raised stretch of the panel card's top edge widens to one
-  tab per item, all the same width with the glyph centred, split by
-  straight vertical dividers; only after the last tab does the edge step
-  down at 45° to the card, like the card's usual tab. Tried and rejected
-  (2026-10-14): 45° diagonals between tabs (shared or not, the glyphs never
-  sat evenly) and separate tabs with a gap.
+- **PanelTabs** are the card's own tab grown into folder tabs, like the
+  tabs of a folder icon, not a row of buttons: the raised stretch of the
+  panel card's top edge widens to one wide, low tab per item. Neighbours
+  share one steep divider and the edge steps down after the last at the
+  same slant (`run` = 0.4 x the tab height, steeper than the card's usual
+  45°); every tab is equally wide at mid height, glyph centred there.
+  Tried and rejected (2026-10-14): 45° diagonals between tabs, straight
+  vertical dividers, and separate tabs with a gap.
   Each tab holds a glyph only (the item is named in the content below);
   the current one takes the active state (stroke 100%, 40% fill, `fg`
   glyph) and is left open at the bottom, joined to the body like a folder,

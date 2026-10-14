@@ -22,6 +22,9 @@ Item {
 	// 0 = flat top edge
 	property real tabStep: 0
 	property real tabLength: Math.min(width * 0.28, 120)
+	// How far right the tab's step runs while dropping tabStep: equal is the
+	// usual 45 degrees, less is steeper (a panel's folder tabs)
+	property real tabRun: tabStep
 	property bool leftBar: false
 	property color barColor: strokeColor
 
@@ -56,7 +59,7 @@ Item {
 				path: [
 					Qt.point(path.l, path.t),
 					Qt.point(path.l + (path.s > 0 ? root.tabLength : 0), path.t),
-					Qt.point(path.l + (path.s > 0 ? root.tabLength + path.s : 0), path.t + path.s),
+					Qt.point(path.l + (path.s > 0 ? root.tabLength + root.tabRun : 0), path.t + path.s),
 					Qt.point(path.r, path.t + path.s),
 					Qt.point(path.r, path.b - path.nr),
 					Qt.point(path.r - path.nr, path.b),

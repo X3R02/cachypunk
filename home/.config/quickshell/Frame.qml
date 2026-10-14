@@ -24,6 +24,7 @@ Item {
 	// top edge to hold them; -1 keeps the card's usual small tab
 	property real tabHeight: -1
 	property real tabLength: -1
+	property real tabRun: -1
 
 	readonly property real tab: simple ? 0 : tabHeight >= 0 ? tabHeight : Theme.cardTab
 	// Bracket width plus the gapper after it; the cell starts there
@@ -68,6 +69,7 @@ Item {
 		notch: frame.notch
 		tabStep: frame.tab
 		tabLength: frame.tabLength >= 0 ? frame.tabLength : Math.min(width * 0.28, 120)
+		tabRun: frame.tabRun >= 0 ? frame.tabRun : frame.tab
 	}
 
 	Scanlines {
