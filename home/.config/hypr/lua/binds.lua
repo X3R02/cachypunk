@@ -158,6 +158,7 @@ k.ctrl("A", progs.panel("volume"), "Audio settings")
 k.ctrl("E", progs.panel("battery"), "Battery settings")
 -- The system's look: the colour theme switcher
 k.ctrl("T", progs.themes(), "Theme switcher")
+k.ctrl("D", progs.wallpapers(), "Wallpaper picker")
 k.ctrl("C", progs.tui("btop"), "System monitor")
 
 ---------------------------------------------------------------------

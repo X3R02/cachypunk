@@ -96,7 +96,7 @@ install_packages() {
 # backup first, so nothing of yours is ever overwritten
 link_all() {
 	local backup="$HOME/.local/state/cachypunk/backups/$(date +%Y%m%d-%H%M%S)"
-	local path src dst moved=0 linked=0
+	local path src dst moved=0 linked=0 shell_linked=0
 	while IFS= read -r path; do
 		path=${path%%#*}
 		path=${path%"${path##*[![:space:]]}"}
@@ -116,6 +116,7 @@ link_all() {
 		mkdir -p "$(dirname "$dst")"
 		ln -s "$src" "$dst"
 		linked=$((linked + 1))
+		[[ $path == .config/quickshell* ]] && shell_linked=1
 	done <"$REPO/links.txt"
 	# This script itself, so `cachypunk update` works from anywhere
 	ln -sfn "$REPO/cachypunk" "$HOME/.local/bin/cachypunk"
@@ -124,7 +125,7 @@ link_all() {
 	else
 		say "Links: $linked created"
 	fi
-	[ "$linked" -gt 0 ] && restart_shell
+	[ "$shell_linked" = 1 ] && restart_shell
 	return 0
 }
 

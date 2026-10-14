@@ -66,4 +66,10 @@ function M.themes()
 	return hl.dsp.exec_cmd("qs ipc call themes toggle")
 end
 
+-- The wallpaper picker: the current theme's image, from <pictures>/wallpapers
+-- or the palette's own, applied through wallpaper-set.
+function M.wallpapers()
+	return hl.dsp.exec_cmd("qs ipc call wallpapers toggle")
+end
+
 return M

@@ -101,6 +101,15 @@ ShellRoot {
 		}
 	}
 
+	// `qs ipc call wallpapers toggle` opens the wallpaper picker
+	IpcHandler {
+		target: "wallpapers"
+
+		function toggle(): void {
+			wallpaperPicker.toggle();
+		}
+	}
+
 	// `qs ipc call notifications dismiss` clears every popup;
 	// `qs ipc call notifications dnd` switches Do not disturb
 	IpcHandler {
@@ -135,6 +144,10 @@ ShellRoot {
 
 	ThemeSwitcher {
 		id: themeSwitcher
+	}
+
+	WallpaperPicker {
+		id: wallpaperPicker
 	}
 
 	// The "Config reloaded" toast is Quickshell's own, unthemed; a failed

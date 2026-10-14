@@ -61,6 +61,32 @@ Module {
 	marked: panel.open
 	onClicked: Panels.toggle(key)
 
+	// Low-battery warnings, sent as ordinary notifications through the shell's
+	// own server (so they land in the history too): one at 10%, a critical one
+	// at 5% (critical shows even under Do not disturb and stays until
+	// dismissed). Each fires once per discharge; plugging in re-arms them.
+	// Only the first screen's bar sends them, or every bar would.
+	property int warnedAt: 101
+
+	function checkLow(): void {
+		if (!dev.ready || !dev.isLaptopBattery || screenName !== Quickshell.screens[0]?.name)
+			return;
+		if (charging) {
+			warnedAt = 101;
+			return;
+		}
+		if (level <= 5 && warnedAt > 5) {
+			warnedAt = 5;
+			Quickshell.execDetached(["notify-send", "-a", "Battery", "-u", "critical", "-i", "battery-caution", "Battery at " + level + "%", "Plug in now."]);
+		} else if (level <= 10 && warnedAt > 10) {
+			warnedAt = 10;
+			Quickshell.execDetached(["notify-send", "-a", "Battery", "-u", "normal", "-i", "battery-low", "Battery at " + level + "%", stateText + ". Plug in soon."]);
+		}
+	}
+
+	onLevelChanged: checkLow()
+	onChargingChanged: checkLow()
+
 	// Charge limits TLP writes at boot (START/STOP_CHARGE_THRESH_BAT0)
 	FileView {
 		id: startThreshold

@@ -1,0 +1,47 @@
+#!/bin/sh
+# Set the current theme's wallpaper, then re-apply the theme so the desktop,
+# the lock screen and SDDM all show it.
+#
+#   wallpaper-set <image>     use this image for the current theme
+#   wallpaper-set --palette   back to the one drawn from the palette
+#   wallpaper-set --list      the images the picker offers, one per line
+#
+# The choice is a link in ~/.config/cachypunk/wallpapers/<theme>.<ext>, which
+# theme-set looks for first: per machine, never in the repo. Images come from
+# <pictures>/wallpapers (xdg-user-dir), else ~/Pictures/wallpapers.
+set -eu
+
+dir="$HOME/.config/cachypunk/wallpapers"
+theme=$(cat "$HOME/.config/matugen/current" 2>/dev/null || echo nightcity)
+
+source_dir() {
+	for d in "$(xdg-user-dir PICTURES 2>/dev/null)/wallpapers" "$HOME/Pictures/wallpapers"; do
+		[ -d "$d" ] && echo "$d" && return
+	done
+}
+
+case ${1:-} in
+--list)
+	src=$(source_dir) || true
+	[ -n "$src" ] || exit 0
+	find "$src" -maxdepth 1 -type f \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.webp' \) | sort
+	exit 0
+	;;
+--palette)
+	rm -f "$dir/$theme".jpg "$dir/$theme".jpeg "$dir/$theme".png "$dir/$theme".webp
+	;;
+"")
+	sed -n '2,10p' "$0" | sed 's/^# \{0,1\}//'
+	exit 1
+	;;
+*)
+	img=$(readlink -f "$1")
+	[ -f "$img" ] || { echo "wallpaper-set: no such image: $1" >&2; exit 1; }
+	mkdir -p "$dir"
+	rm -f "$dir/$theme".jpg "$dir/$theme".jpeg "$dir/$theme".png "$dir/$theme".webp
+	ext=$(printf '%s' "${img##*.}" | tr 'A-Z' 'a-z')
+	ln -s "$img" "$dir/$theme.$ext"
+	;;
+esac
+
+exec "$HOME/.local/bin/theme-set" "$theme"
