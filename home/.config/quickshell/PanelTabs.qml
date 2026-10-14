@@ -13,7 +13,8 @@
 // entries, the current tab takes no fill: it keeps the card's dark backing
 // and an open floor, so tab and content read as one surface, and it is told
 // apart only by its glyph in `accent` while the others are `muted`. Focus
-// (the cursor) lights the tab's edges in `structure`, without a fill; an
+// (the cursor) touches neither fill nor edges, which stay the frame's 1 px
+// `line` like the rest of the popup: it brightens the glyph to `fg`. An
 // activation still flashes 70%. Panel walks this strip
 // before the body, so the tabs come first under Up/Down, and pages it with
 // Q / E. Paging with the cursor on a tab carries the cursor along.
@@ -86,7 +87,6 @@ Item {
 			readonly property bool hovered: strip.panelWindow?.keyboardNav ? strip.panelWindow.cursor === tab : mouse.containsMouse
 			property bool flashing: false
 			readonly property real fill: flashing ? Theme.flashFill : 0
-			readonly property bool lit: hovered || flashing
 
 			readonly property real h: strip.tabHeight
 			// Top corners, and where the sides meet the floor: both sides
@@ -152,20 +152,6 @@ Item {
 						path: [Qt.point(tab.x1, strip.edge), Qt.point(tab.foot, tab.h)]
 					}
 				}
-
-				// Focused: the tab's own edges at full strength, left open at
-				// the bottom
-				ShapePath {
-					strokeColor: tab.lit ? Colors.structure : "transparent"
-					strokeWidth: strip.lw
-					fillColor: "transparent"
-					joinStyle: ShapePath.MiterJoin
-					capStyle: ShapePath.FlatCap
-
-					PathPolyline {
-						path: [Qt.point(tab.b0 + (tab.index === 0 ? strip.edge : 0), tab.h), Qt.point(tab.x0 + (tab.index === 0 ? strip.edge : 0), strip.edge), Qt.point(tab.x1, strip.edge), Qt.point(tab.foot, tab.h)]
-					}
-				}
 			}
 
 			BarIcon {
@@ -173,7 +159,7 @@ Item {
 				x: Math.round(((tab.x0 + tab.b0) / 2 + (tab.x1 + tab.foot) / 2) / 2 - width / 2)
 				y: Math.round((tab.h - height) / 2)
 				text: tab.modelData
-				color: tab.current ? Colors.accent : Colors.muted
+				color: tab.hovered ? Colors.fg : tab.current ? Colors.accent : Colors.muted
 			}
 
 			MouseArea {

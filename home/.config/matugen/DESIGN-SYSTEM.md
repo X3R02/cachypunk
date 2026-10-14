@@ -124,9 +124,11 @@ Nesting rules:
   fill** — it keeps the card's dark backing and an open floor, joined to
   the body like a folder, so tab and content read as one surface — and is
   told apart only by its glyph in `accent`, the others `muted` and closed
-  off by a `line` stroke. Focus lights a tab's edges in `structure`
-  without a fill. A filled current tab was tried and rejected
-  (2026-10-14): it split the tab from the content. Use tabs when a panel
+  off by a `line` stroke. Focus touches neither fill nor edges (they stay
+  the frame's 1 px `line`, like the rest of the popup): it turns the glyph
+  `fg`. Tried and rejected (2026-10-14): a filled current tab (it split
+  the tab from the content) and `structure` edges on focus (they read
+  heavier than everything else in the popup). Use tabs when a panel
   would otherwise repeat the same block once per item (agents, accounts):
   only the current tab's content is drawn, so the panel keeps one height
   however many items there are. Whatever sits below (Refresh, Advanced)
