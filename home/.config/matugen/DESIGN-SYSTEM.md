@@ -113,13 +113,11 @@ Nesting rules:
   Nothing else.
 - **PanelTabs** are the card's own tab grown into folder tabs, not a row of
   buttons: the raised stretch of the panel card's top edge widens to one
-  tab per item; neighbours share one 45° diagonal and the last steps down
-  at 45° to the card. Every glyph keeps the same clear space from its tab's
-  sides, measured where they come closest: the shared diagonal leans into
-  the tab on its right, so tabs after the first are wider on the left.
-  Tried and rejected (2026-10-14): glyphs centred without that extra room
-  (they looked squeezed between `\ \`), and separate `| \` tabs, with
-  or without a gap (they no longer touch).
+  tab per item, all the same width with the glyph centred, split by
+  straight vertical dividers; only after the last tab does the edge step
+  down at 45° to the card, like the card's usual tab. Tried and rejected
+  (2026-10-14): 45° diagonals between tabs (shared or not, the glyphs never
+  sat evenly) and separate tabs with a gap.
   Each tab holds a glyph only (the item is named in the content below);
   the current one takes the active state (stroke 100%, 40% fill, `fg`
   glyph) and is left open at the bottom, joined to the body like a folder,
