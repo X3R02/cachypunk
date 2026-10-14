@@ -111,9 +111,13 @@ Nesting rules:
   optional toggle (PanelButton) → headings with their rows and sliders →
   divider → `Advanced` (PanelButton, always last, opens the full tool).
   Nothing else.
-- **PanelTabs** are the card's own tab grown into folder tabs, not a row of
-  buttons: the raised stretch of the panel card's top edge widens to one
-  tab per item, split by 45° dividers, stepping down at 45° after the last.
+- **PanelTabs** are folder tabs standing on the panel card's top edge, not a
+  row of buttons: the card's tab repeated, one per item. Every tab has the
+  same shape, `| \` (vertical left side, flat top, 45° right side), and the
+  next one's left side rises where the slant lands, so they touch and every
+  glyph sits the same distance from its tab's left edge. A row where only
+  the first tab is `| \` and the rest `\ \` was tried and rejected
+  (2026-10-14), and so was a gap between tabs.
   Each tab holds a glyph only (the item is named in the content below);
   the current one takes the active state (stroke 100%, 40% fill, `fg`
   glyph) and is left open at the bottom, joined to the body like a folder,
@@ -122,7 +126,7 @@ Nesting rules:
   only the current tab's content is drawn, so the panel keeps one height
   however many items there are. Whatever sits below (Refresh, Advanced)
   belongs to the whole panel, not to a tab. A panel opts in with
-  `tabIcons` / `tabIndex`; `Panel` draws the tabs and raises the edge.
+  `tabIcons` / `tabIndex`; `Panel` draws the tabs and lowers the card under them.
 - A **PanelRow** holds at most one Chip *or* one detail, never both. A state
   is a Chip; a number (signal %, battery %) is a detail.
 - A **Chip** never contains an icon and is never a button.
