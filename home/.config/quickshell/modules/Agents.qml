@@ -51,8 +51,9 @@ Module {
 	visible: records.length > 0
 	icon: "󰚩"
 	iconColor: tightest && tightest.percent >= 0.8 ? levelColor(tightest.percent) : Colors.structure
-	value: tightest ? Math.round(tightest.percent * 100) + "%" : ""
-	valueColor: tightest && tightest.percent >= 0.8 ? levelColor(tightest.percent) : Colors.accent
+	// Icon only, to keep the bar short: its colour turns at 80%, the figure
+	// is in the tooltip and the panel
+	tooltip: panel.open || !tightest ? "" : "AI usage " + Math.round(tightest.percent * 100) + "%"
 	marked: panel.open
 	onClicked: Panels.toggle(key)
 

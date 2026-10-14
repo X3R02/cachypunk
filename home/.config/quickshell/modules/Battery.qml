@@ -55,9 +55,9 @@ Module {
 	visible: dev.ready && dev.isLaptopBattery
 	icon: (charging ? chargingIcons : icons)[Math.min(9, Math.floor(level / 10))]
 	iconColor: panel.open ? Colors.accent : stateColor
-	value: level + "%"
-	valueColor: charging || level <= 20 ? stateColor : Colors.accent
-	tooltip: panel.open ? "" : stateText
+	// Icon only, to keep the bar short: the glyph fills with the level and
+	// takes the warning colours; the figure is in the tooltip and the panel
+	tooltip: panel.open ? "" : level + "%  " + stateText
 	marked: panel.open
 	onClicked: Panels.toggle(key)
 

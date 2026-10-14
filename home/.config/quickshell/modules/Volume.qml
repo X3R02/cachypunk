@@ -19,7 +19,8 @@ Module {
 
 	icon: Audio.sinkIcon(Audio.sink)
 	iconColor: panel.open ? Colors.accent : muted ? Colors.muted : Colors.structure
-	value: muted ? "" : volume + "%"
+	// Icon only, to keep the bar short: the level is in the tooltip and the
+	// panel, and the icon greys out when muted
 	tooltip: panel.open ? "" : (Audio.name(Audio.sink) || "No output") + "  " + volume + "%"
 	marked: panel.open
 	onClicked: Panels.toggle(key)
