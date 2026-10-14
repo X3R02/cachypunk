@@ -76,10 +76,6 @@ PanelWindow {
 				barWindow: bar
 				screenName: bar.modelData.name
 			}
-			Cpu {
-				barWindow: bar
-				screenName: bar.modelData.name
-			}
 			Network {
 				barWindow: bar
 				screenName: bar.modelData.name
@@ -97,6 +93,10 @@ PanelWindow {
 				screenName: bar.modelData.name
 			}
 			Notifications {
+				barWindow: bar
+				screenName: bar.modelData.name
+			}
+			Cpu {
 				barWindow: bar
 				screenName: bar.modelData.name
 			}

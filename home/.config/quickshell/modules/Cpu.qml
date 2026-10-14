@@ -34,7 +34,8 @@ Module {
 
 	icon: "󰻠"
 	iconColor: panel.open ? Colors.accent : usage >= 85 ? Colors.alert : usage >= 60 ? Colors.warn : Colors.structure
-	value: usage < 0 ? "" : usage + "%"
+	// Icon only, to keep the bar short: it turns yellow at 60% and red at 85%;
+	// the figure is in the tooltip and the panel
 	tooltip: panel.open || usage < 0 ? "" : "CPU " + usage + "%"
 	marked: panel.open
 	onClicked: Panels.toggle(key)
