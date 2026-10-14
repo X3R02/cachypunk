@@ -2,7 +2,10 @@
 // folder icon: the card's tab (the raised first stretch of the top edge,
 // Frame/NotchRect) grows into a row of wide, low tabs, one per icon. Tabs
 // share 45-degree dividers and the edge steps down after the last at the
-// same 45 degrees (`run` = tabHeight). The current tab stands in front: its
+// same 45 degrees (`run` = tabHeight). The strip is a carousel: the current
+// tab is always the first slot and the others follow in order, wrapping, so
+// changing tab rotates the icons while the tab shapes stay put and only the
+// content moves. The current tab stands in front: its
 // left side is straight, so the tab before it ends straight down and the
 // others read as a layer behind. Panel places this over the Frame and gives
 // the Frame the matching raised edge (`tabLength` = topX(count), `tab` =
@@ -52,10 +55,10 @@ Item {
 		for (let i = 0; i < repeater.count; i++)
 			if (repeater.itemAt(i) === panelWindow?.cursor)
 				cursorOnTab = true;
-		const next = (index + count) % count;
-		selected(next);
+		selected((index + count) % count);
+		// The current tab is always slot 0, so that is where the cursor goes
 		if (cursorOnTab)
-			panelWindow.takeCursor(repeater.itemAt(next));
+			panelWindow.takeCursor(repeater.itemAt(0));
 	}
 
 	function step(n: int): void {
@@ -75,16 +78,17 @@ Item {
 	Repeater {
 		id: repeater
 
-		model: strip.icons
+		// One slot per tab; slot j shows the tab j places after the current
+		model: strip.count
 
 		Item {
 			id: tab
 
-			required property string modelData
 			required property int index
+			readonly property int item: (strip.currentIndex + index) % Math.max(1, strip.count)
 
 			readonly property bool navigable: true
-			readonly property bool current: index === strip.currentIndex
+			readonly property bool current: index === 0
 			readonly property bool last: index === strip.count - 1
 			// The panel opens with its cursor on the current tab
 			readonly property bool preferred: current
@@ -94,20 +98,18 @@ Item {
 
 			readonly property real h: strip.tabHeight
 			// Top corners, and where the sides meet the floor: sides lean by
-			// one run, except a straight left side on the first and current
-			// tabs and a straight right side on the tab before the current
+			// one run, except the first slot's straight left side, which is
+			// the card's edge. The current tab always sits there, in front,
+			// and the others lean behind it like the tabs of a folder
 			readonly property real x0: strip.topX(index)
 			readonly property real x1: strip.topX(index + 1)
-			// The current tab stands straight on its left, like the front tab
-			// of a folder, so the tab before it ends straight down too
-			readonly property bool nextCurrent: index + 1 === strip.currentIndex
-			readonly property real b0: index === 0 || current ? x0 : x0 + strip.run
-			readonly property real foot: nextCurrent ? x1 : x1 + strip.run
+			readonly property real b0: index === 0 ? x0 : x0 + strip.run
+			readonly property real foot: x1 + strip.run
 
 			function activate(): void {
 				flashing = true;
 				flashTimer.restart();
-				strip.select(index);
+				strip.select(item);
 			}
 
 			function adjust(n: int): void {
@@ -166,7 +168,7 @@ Item {
 				// Centred at mid height, between the sides' midpoints
 				x: Math.round(((tab.x0 + tab.b0) / 2 + (tab.x1 + tab.foot) / 2) / 2 - width / 2)
 				y: Math.round((tab.h - height) / 2)
-				text: tab.modelData
+				text: strip.icons[tab.item] ?? ""
 				color: tab.current ? Colors.accent : tab.hovered ? Colors.fg : Colors.muted
 			}
 

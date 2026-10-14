@@ -115,11 +115,14 @@ Nesting rules:
   tabs of a folder icon, not a row of buttons: the raised stretch of the
   panel card's top edge widens to one wide, low tab per item. Neighbours
   share 45° dividers and the edge steps down after the last at 45°. **The
-  current tab stands in front**: its left side is straight, so the tab
-  before it ends straight down and the rest read as a layer behind it.
+  strip is a carousel**: the current tab is always the first, in front,
+  with the card's straight left edge, and the others follow in order behind
+  it, wrapping. Changing tab rotates the glyphs; the tab shapes stay put
+  and the content slides in from the side it was paged towards.
   Every tab is equally wide at mid height, glyph centred there.
   Tried and rejected (2026-10-14): every divider leaning (the current tab
-  sat between two slants), straight vertical dividers everywhere, separate
+  sat between two slants), the current tab standing in place in the row
+  (superseded by the carousel), straight vertical dividers everywhere, separate
   tabs with a gap, and a steeper slant (0.4 x the height) — 45° won once
   the front tab stood straight.
   Each tab holds a glyph only (the item is named in the content below).

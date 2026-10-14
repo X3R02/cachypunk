@@ -117,9 +117,50 @@ Module {
 		tabIndex: mod.currentIndex
 		onTabIndexChanged: mod.currentId = mod.records[tabIndex]?.id ?? ""
 
-		// The current tab's agent; only one is ever drawn
+		// The current tab's agent; only one is ever drawn. The tabs stay put
+		// (a carousel), so the content is what moves: it slides in from the
+		// side it was paged towards
 		Column {
 			id: agent
+
+			property int lastIndex: mod.currentIndex
+
+			transform: Translate {
+				id: slide
+			}
+
+			Connections {
+				target: mod
+
+				function onCurrentIndexChanged(): void {
+					const n = mod.records.length;
+					const forward = (mod.currentIndex - agent.lastIndex + n) % n <= n / 2;
+					agent.lastIndex = mod.currentIndex;
+					slideIn.from = forward ? 24 : -24;
+					slideIn.restart();
+					fadeIn.restart();
+				}
+			}
+
+			NumberAnimation {
+				id: slideIn
+
+				target: slide
+				property: "x"
+				to: 0
+				duration: 160
+				easing.type: Easing.OutCubic
+			}
+
+			NumberAnimation {
+				id: fadeIn
+
+				target: agent
+				property: "opacity"
+				from: 0
+				to: 1
+				duration: 160
+			}
 
 			readonly property var modelData: mod.current ?? ({})
 			readonly property real inner: width - leftPadding - rightPadding
