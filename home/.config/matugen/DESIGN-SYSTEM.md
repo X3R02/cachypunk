@@ -114,11 +114,14 @@ Nesting rules:
 - **PanelTabs** are the card's own tab grown into folder tabs, like the
   tabs of a folder icon, not a row of buttons: the raised stretch of the
   panel card's top edge widens to one wide, low tab per item. Neighbours
-  share one steep divider and the edge steps down after the last at the
-  same slant (`run` = 0.4 x the tab height, steeper than the card's usual
-  45°); every tab is equally wide at mid height, glyph centred there.
-  Tried and rejected (2026-10-14): 45° diagonals between tabs, straight
-  vertical dividers, and separate tabs with a gap.
+  share 45° dividers and the edge steps down after the last at 45°. **The
+  current tab stands in front**: its left side is straight, so the tab
+  before it ends straight down and the rest read as a layer behind it.
+  Every tab is equally wide at mid height, glyph centred there.
+  Tried and rejected (2026-10-14): every divider leaning (the current tab
+  sat between two slants), straight vertical dividers everywhere, separate
+  tabs with a gap, and a steeper slant (0.4 x the height) — 45° won once
+  the front tab stood straight.
   Each tab holds a glyph only (the item is named in the content below).
   Tabs break the entry states on purpose: the current tab takes **no
   fill** — it keeps the card's dark backing and an open floor, joined to

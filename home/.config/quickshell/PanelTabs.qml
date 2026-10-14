@@ -1,20 +1,22 @@
 // The tabs of a Panel, drawn as the card's own top edge, like the tabs on a
 // folder icon: the card's tab (the raised first stretch of the top edge,
-// Frame/NotchRect) grows into a row of wide, low tabs, one per icon. Next
-// tabs share one steep divider, and the edge steps down after the last at
-// the same slant - steeper than the card's usual 45 degrees, `run` px across
-// for the tab's full height. Panel places this over the Frame and gives the
-// Frame the matching raised edge (`tabLength` = topX(count), `tab` =
+// Frame/NotchRect) grows into a row of wide, low tabs, one per icon. Tabs
+// share 45-degree dividers and the edge steps down after the last at the
+// same 45 degrees (`run` = tabHeight). The current tab stands in front: its
+// left side is straight, so the tab before it ends straight down and the
+// others read as a layer behind. Panel places this over the Frame and gives
+// the Frame the matching raised edge (`tabLength` = topX(count), `tab` =
 // tabHeight, `tabRun` = run); this item only draws what lies inside that
 // edge: the dividers, the line that closes each tab off from the body (left
-// open under the current tab, like a folder), the state planes and the icons.
+// open under the current tab, like a folder), the flash plane and the icons.
 //
 // Every tab is a panel entry (navigable, activate, adjust). Unlike other
 // entries, the current tab takes no fill: it keeps the card's dark backing
 // and an open floor, so tab and content read as one surface, and it is told
 // apart only by its glyph in `accent` while the others are `muted`. Focus
 // (the cursor) touches neither fill nor edges, which stay the frame's 1 px
-// `line` like the rest of the popup: it brightens the glyph to `fg`. An
+// `line` like the rest of the popup: it brightens another tab's glyph to
+// `fg`; the current glyph stays `accent`. An
 // activation still flashes 70%. Panel walks this strip
 // before the body, so the tabs come first under Up/Down, and pages it with
 // Q / E. Paging with the cursor on a tab carries the cursor along.
@@ -30,8 +32,10 @@ Item {
 	property real tabHeight: 24
 	// Width of every tab, measured at mid height, where the glyph sits
 	property real tabWidth: 72
-	// How far a divider runs right while dropping the tab's height
-	property real run: Math.round(tabHeight * 0.4)
+	// How far a divider runs right while dropping the tab's height: 45
+	// degrees, the card's own cut. A steeper 0.4 x tabHeight was tried; with
+	// the front tab's straight side, 45 reads as the game's card tab
+	property real run: tabHeight
 
 	readonly property var panelWindow: QsWindow.window
 	readonly property int count: icons.length
@@ -89,12 +93,16 @@ Item {
 			readonly property real fill: flashing ? Theme.flashFill : 0
 
 			readonly property real h: strip.tabHeight
-			// Top corners, and where the sides meet the floor: both sides
-			// lean by one run, except the first tab's straight left side
+			// Top corners, and where the sides meet the floor: sides lean by
+			// one run, except a straight left side on the first and current
+			// tabs and a straight right side on the tab before the current
 			readonly property real x0: strip.topX(index)
 			readonly property real x1: strip.topX(index + 1)
-			readonly property real b0: index === 0 ? 0 : x0 + strip.run
-			readonly property real foot: x1 + strip.run
+			// The current tab stands straight on its left, like the front tab
+			// of a folder, so the tab before it ends straight down too
+			readonly property bool nextCurrent: index + 1 === strip.currentIndex
+			readonly property real b0: index === 0 || current ? x0 : x0 + strip.run
+			readonly property real foot: nextCurrent ? x1 : x1 + strip.run
 
 			function activate(): void {
 				flashing = true;
@@ -159,7 +167,7 @@ Item {
 				x: Math.round(((tab.x0 + tab.b0) / 2 + (tab.x1 + tab.foot) / 2) / 2 - width / 2)
 				y: Math.round((tab.h - height) / 2)
 				text: tab.modelData
-				color: tab.hovered ? Colors.fg : tab.current ? Colors.accent : Colors.muted
+				color: tab.current ? Colors.accent : tab.hovered ? Colors.fg : Colors.muted
 			}
 
 			MouseArea {
