@@ -16,7 +16,7 @@
 // PanelButton, PanelRow and PanelSlider are the stock entries. On open the
 // cursor starts on the entry marked `preferred: true`, else on the first.
 // A panel with tabs sets `tabIcons` (one glyph per tab) and follows
-// `tabIndex`: folder tabs (PanelTabs) then stand on the card's top edge,
+// `tabIndex`: the card's top edge then rises into folder tabs (PanelTabs),
 // which come first under Up/Down and also page with Q / E, the game's
 // bumpers; a cursor left on content the new tab hid goes back to the top.
 import Quickshell
@@ -191,7 +191,8 @@ PanelWindow {
 			// edge line by popupGap
 			x: Math.round(Math.max(0, Math.min(panel.targetX + panel.target.width / 2 - width / 2, keys.width - width)))
 			y: Theme.popupGap
-			headerHeight: tabStrip.visible ? tabStrip.tabHeight : 0
+			tabHeight: tabStrip.visible ? tabStrip.tabHeight : -1
+			tabLength: tabStrip.visible ? tabStrip.topX(tabStrip.count) : -1
 
 			Column {
 				id: body
@@ -201,7 +202,7 @@ PanelWindow {
 			}
 		}
 
-		// Standing on the cell's top edge, in the room the frame leaves above it
+		// Inside the frame's raised top edge, over the cell
 		PanelTabs {
 			id: tabStrip
 
