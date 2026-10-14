@@ -11,8 +11,8 @@ What you get:
 
 - **Quickshell** as the only shell: bar, keyboard-driven panels (network,
   bluetooth, audio, battery, media, system, notifications with history and
-  Do not disturb, power, AI usage with a tab per agent in use, paged with
-  Q / E), privacy indicators that appear only while the mic,
+  Do not disturb, power, AI usage (`SUPER + A`) with a tab per agent in
+  use, paged with Q / E), privacy indicators that appear only while the mic,
   camera or screen are in use, OSD, notifications, the wallpaper and the
   polkit agent.
 - **walker + elephant** as the launcher, clipboard, file search and emoji picker.

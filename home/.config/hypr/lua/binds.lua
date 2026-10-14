@@ -58,6 +58,9 @@ k.super("M", progs.panel("media"), "Media player")
 -- The notification history, with the Do not disturb switch at its top
 k.super("N", progs.panel("notifications"), "Notifications")
 
+-- The AI agents' usage limits, one tab per agent in use (Q / E page them)
+k.super("A", progs.panel("agents"), "AI usage")
+
 -- One bind per app, keyed by the letter in programs.apps.
 for key, app in pairs(progs.apps) do
 	k.super(key, progs.launch(app.desktop), app.name)
