@@ -3,7 +3,8 @@
 // the left, a dark gapper that stops the background leaking through, and the
 // cell - tab on the top edge, bottom-right corner cut - over faint
 // scanlines. `simple` drops bracket and tab, leaving the plain card: one
-// frame, only the corner cut.
+// frame, only the corner cut. `tabHeight` / `tabLength` raise a bigger tab,
+// which a Panel fills with its PanelTabs.
 // Sizes are rounded up to whole pixels: at fractional scales a fractional
 // edge put the 1px border on a half pixel, where it could vanish.
 import QtQuick
@@ -19,8 +20,12 @@ Item {
 	// 0 = all four corners square
 	property real notch: Theme.notch
 	property bool simple: false
+	// A Panel with tabs (PanelTabs) raises a longer, taller stretch of the
+	// top edge to hold them; -1 keeps the card's usual small tab
+	property real tabHeight: -1
+	property real tabLength: -1
 
-	readonly property real tab: simple ? 0 : Theme.cardTab
+	readonly property real tab: simple ? 0 : tabHeight >= 0 ? tabHeight : Theme.cardTab
 	// Bracket width plus the gapper after it; the cell starts there
 	readonly property real cellX: simple ? 0 : Theme.bracketWidth + Theme.gapperWidth
 
@@ -62,6 +67,7 @@ Item {
 		strokeWidth: frame.strokeWidth
 		notch: frame.notch
 		tabStep: frame.tab
+		tabLength: frame.tabLength >= 0 ? frame.tabLength : Math.min(width * 0.28, 120)
 	}
 
 	Scanlines {

@@ -94,6 +94,7 @@ Rules:
 | Component | File | Use | Contains |
 |---|---|---|---|
 | Module | `Module.qml` | one bar segment | icon, value |
+| PanelTabs | `PanelTabs.qml` (placed by `Panel`) | pages of one panel that hold the same kind of content (one per AI agent) | one glyph per tab |
 | PanelHeading | `PanelHeading.qml` | names a group in a panel | text only |
 | PanelRow | `PanelRow.qml` | one item of a list where one or more are *active* | icon, label, badge glyph, chip or detail |
 | PanelButton | `PanelButton.qml` | an action (Lock, Advanced, Back) | icon, label |
@@ -106,9 +107,22 @@ Rules:
 
 Nesting rules:
 
-- A **Panel** contains, top to bottom: optional toggle (PanelButton) →
-  headings with their rows and sliders → divider → `Advanced` (PanelButton,
-  always last, opens the full tool). Nothing else.
+- A **Panel** contains, top to bottom: optional tabs on its top edge (PanelTabs) →
+  optional toggle (PanelButton) → headings with their rows and sliders →
+  divider → `Advanced` (PanelButton, always last, opens the full tool).
+  Nothing else.
+- **PanelTabs** are the card's own tab grown into folder tabs, not a row of
+  buttons: the raised stretch of the panel card's top edge widens to one
+  tab per item, split by 45° dividers, stepping down at 45° after the last.
+  Each tab holds a glyph only (the item is named in the content below);
+  the current one takes the active state (stroke 100%, 40% fill, `fg`
+  glyph) and is left open at the bottom, joined to the body like a folder,
+  while the others are closed off by a `line` stroke. Use tabs when a panel
+  would otherwise repeat the same block once per item (agents, accounts):
+  only the current tab's content is drawn, so the panel keeps one height
+  however many items there are. Whatever sits below (Refresh, Advanced)
+  belongs to the whole panel, not to a tab. A panel opts in with
+  `tabIcons` / `tabIndex`; `Panel` draws the tabs and raises the edge.
 - A **PanelRow** holds at most one Chip *or* one detail, never both. A state
   is a Chip; a number (signal %, battery %) is a detail.
 - A **Chip** never contains an icon and is never a button.
@@ -164,9 +178,15 @@ One set of states for every entry (`EntryFrame.qml`), from CDPR's guide:
 - **Keyboard first.** Every surface that takes input works without a mouse:
   Up/Down (j/k, Tab) move, Enter/Space activate, Left/Right (h/l) adjust or
   move sideways, Delete is the secondary action, Escape closes or goes back.
+- **Tabs page like the game**: Q / E go to the previous / next tab from
+  anywhere in the panel, wrapping; a tab also switches on click, on Enter
+  with the cursor on it, and with Left/Right while focused. Paging with the
+  cursor on a tab carries it to the new tab; a cursor left on content the
+  new tab hid goes back to the top. The panel opens on the tab last shown.
 - **A panel opens with its cursor placed**: on the entry marked
-  `preferred: true` when there is an obvious first action (media: play/pause),
-  otherwise on the first entry from the top. Never on nothing.
+  `preferred: true` when there is an obvious first action (media: play/pause;
+  a tabbed panel: its current tab), otherwise on the first entry from the
+  top. Never on nothing.
 - **Destructive actions confirm** in a modal (log out, restart, shut down)
   with BACK focused by default. Reversible actions don't (lock, suspend).
 - **Forgetting or removing an item** takes a second press of the secondary

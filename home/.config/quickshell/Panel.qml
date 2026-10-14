@@ -15,6 +15,10 @@
 // `takeCursor(this)` on hover, so mouse and keyboard share one cursor.
 // PanelButton, PanelRow and PanelSlider are the stock entries. On open the
 // cursor starts on the entry marked `preferred: true`, else on the first.
+// A panel with tabs sets `tabIcons` (one glyph per tab) and follows
+// `tabIndex`: the card's top edge then rises into folder tabs (PanelTabs),
+// which come first under Up/Down and also page with Q / E, the game's
+// bumpers; a cursor left on content the new tab hid goes back to the top.
 import Quickshell
 import Quickshell.Wayland
 import QtQuick
@@ -32,6 +36,10 @@ PanelWindow {
 	// Tells entries they live in a Panel and should follow `cursor`
 	readonly property bool keyboardNav: true
 	property Item cursor: null
+	// One glyph per tab, empty for a panel without tabs; tabIndex is the
+	// tab shown, set by the panel's owner and by the tabs themselves
+	property var tabIcons: []
+	property int tabIndex: 0
 
 	// Where the module sits on the bar, taken when the panel opens
 	property real targetX: 0
@@ -47,6 +55,8 @@ PanelWindow {
 				walk(child);
 			}
 		};
+		if (tabStrip.visible)
+			walk(tabStrip);
 		walk(body);
 		return found;
 	}
@@ -140,6 +150,17 @@ PanelWindow {
 				if (panel.cursor && typeof panel.cursor.adjust === "function")
 					panel.cursor.adjust(event.key === Qt.Key_Left || event.key === Qt.Key_H ? -1 : 1);
 				break;
+			case Qt.Key_Q:
+			case Qt.Key_E:
+				if (!tabStrip.visible)
+					return;
+				tabStrip.step(event.key === Qt.Key_Q ? -1 : 1);
+				// After this frame: the new tab's entries are visible then
+				Qt.callLater(() => {
+					if (panel.entries().indexOf(panel.cursor) < 0)
+						panel.placeCursor();
+				});
+				break;
 			case Qt.Key_Delete:
 				if (panel.cursor && typeof panel.cursor.secondary === "function")
 					panel.cursor.secondary();
@@ -170,6 +191,8 @@ PanelWindow {
 			// edge line by popupGap
 			x: Math.round(Math.max(0, Math.min(panel.targetX + panel.target.width / 2 - width / 2, keys.width - width)))
 			y: Theme.popupGap
+			tabHeight: tabStrip.visible ? tabStrip.tabHeight : -1
+			tabLength: tabStrip.visible ? tabStrip.count * tabStrip.tabWidth : -1
 
 			Column {
 				id: body
@@ -177,6 +200,18 @@ PanelWindow {
 				// Each entry is its own framed card, as the game stacks them
 				spacing: Theme.entrySpacing
 			}
+		}
+
+		// Inside the frame's raised top edge, over the cell
+		PanelTabs {
+			id: tabStrip
+
+			visible: count > 0
+			x: frame.x + frame.cellX
+			y: frame.y
+			icons: panel.tabIcons
+			currentIndex: panel.tabIndex
+			onSelected: index => panel.tabIndex = index
 		}
 	}
 }

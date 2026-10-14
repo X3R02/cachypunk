@@ -3,8 +3,16 @@
 #
 # Runs every agent-usage-<agent> collector next to this script (in parallel)
 # and writes each one's JSON record to ~/.local/state/agent-usage/<agent>.json,
-# then prints all records as one JSON array for the Quickshell bar. Arguments
-# (--force, --limits-only) are passed to every collector.
+# then prints the records of the agents in use as one JSON array for the
+# Quickshell bar. Arguments (--force, --limits-only) are passed to every
+# collector.
+#
+# Detection is the collectors' job: a collector always prints a record, with
+# `"ready": false` when its agent is not installed, signed out or never used,
+# and that record is left out here. So the panel shows a tab for exactly the
+# agents in use, and a new agent appears on its own once it is signed in.
+# Only records of collectors present now are printed: removing a collector
+# removes its agent even though its last record stays in the state dir.
 #
 # Same layout as Omarchy's omarchy-agent-usage-update, minus its multi-account
 # handling: adding an agent means dropping in its collector, nothing else.
@@ -32,10 +40,14 @@ for collector in "$bindir"/agent-usage-*; do
 done
 for pid in "${pids[@]}"; do wait "$pid"; done
 
-shopt -s nullglob
-records=("$state"/*.json)
-if [ ${#records[@]} -eq 0 ]; then
+agents=()
+for collector in "$bindir"/agent-usage-*; do
+	[ -x "$collector" ] || continue
+	record="$state/${collector##*/agent-usage-}.json"
+	[ -f "$record" ] && agents+=("$record")
+done
+if [ ${#agents[@]} -eq 0 ]; then
 	echo "[]"
 else
-	jq -cs . "${records[@]}"
+	jq -cs 'map(select(.ready != false))' "${agents[@]}"
 fi

@@ -1,7 +1,12 @@
 // AI agent usage limits. Records come from ~/.local/bin/agent-usage, which runs
-// one collector per agent (vendored from Omarchy) and prints them all as JSON;
-// this module knows no agent by name. The bar shows the limit closest to
-// running out; click opens every agent's limits and when each one resets.
+// one collector per agent (agent-usage-<agent>; Claude's vendored from
+// Omarchy) and prints, as JSON, only the agents in use: a collector reports
+// `ready: false` for an agent that is missing, signed out or unused. The only
+// per-agent knowledge here is each one's tab glyph (`icons`, the robot for
+// any other). The bar shows the limit closest to running out across all of
+// them; click opens the panel with one folder tab per agent on the card's
+// top edge (PanelTabs: click or Enter on a tab, Left/Right on it, or Q / E
+// anywhere), showing that agent's limits and when each one resets.
 import Quickshell
 import Quickshell.Io
 import QtQuick
@@ -16,12 +21,23 @@ Module {
 	readonly property string key: "agents:" + screenName
 	panelKey: key
 	property var records: []
+	// The tab shown, kept by agent id so it survives records being reordered
+	// or an agent appearing; falls back to the first tab
+	property string currentId: ""
+	// Tab glyphs from Symbols Nerd Font: codicons' Claude mark; Antigravity
+	// has no glyph of its own, so it takes Gemini's four-point star
+	readonly property var icons: ({
+			"claude": "\uec82",
+			"agy": "\u{f0ae2}"
+		})
+	readonly property int currentIndex: Math.max(0, records.findIndex(r => r.id === currentId))
+	readonly property var current: records[currentIndex] ?? null
 	readonly property var tightest: {
 		let best = null;
 		for (const r of records)
 			for (const l of r.limits ?? [])
 				if (!best || l.percent > best.percent)
-					best = l;
+					best = Object.assign({ agent: r.name }, l);
 		return best;
 	}
 
@@ -53,7 +69,7 @@ Module {
 	iconColor: tightest && tightest.percent >= 0.8 ? levelColor(tightest.percent) : Colors.structure
 	// Icon only, to keep the bar short: its colour turns at 80%, the figure
 	// is in the tooltip and the panel
-	tooltip: panel.open || !tightest ? "" : "AI usage " + Math.round(tightest.percent * 100) + "%"
+	tooltip: panel.open || !tightest ? "" : tightest.agent + " " + Math.round(tightest.percent * 100) + "%"
 	marked: panel.open
 	onClicked: Panels.toggle(key)
 
@@ -97,97 +113,99 @@ Module {
 		onOpenChanged: if (open)
 			mod.refresh(["--limits-only"])
 
-		Repeater {
-			model: mod.records
+		tabIcons: mod.records.map(r => mod.icons[r.id] ?? "󰚩")
+		tabIndex: mod.currentIndex
+		onTabIndexChanged: mod.currentId = mod.records[tabIndex]?.id ?? ""
 
-			Column {
-				id: agent
+		// The current tab's agent; only one is ever drawn
+		Column {
+			id: agent
 
-				required property var modelData
+			readonly property var modelData: mod.current ?? ({})
+			readonly property real inner: width - leftPadding - rightPadding
 
-				width: Theme.panelWidth
-				leftPadding: Theme.modulePadding
-				rightPadding: Theme.modulePadding
-				topPadding: 6
-				bottomPadding: 6
-				spacing: 6
+			visible: mod.current !== null
+			width: Theme.panelWidth
+			leftPadding: Theme.modulePadding
+			rightPadding: Theme.modulePadding
+			topPadding: 6
+			bottomPadding: 6
+			spacing: 6
 
-				readonly property real inner: width - leftPadding - rightPadding
+			// The tabs show only glyphs, so the agent is named here
+			Row {
+				spacing: 8
 
-				Row {
-					spacing: 8
+				BarText {
+					text: agent.modelData.name ?? ""
+					color: Colors.accent
+				}
+				BarText {
+					text: agent.modelData.tierLabel ?? ""
+					color: Colors.muted
+				}
+			}
 
-					BarText {
-						text: agent.modelData.name
-						color: Colors.accent
-						font.weight: Font.DemiBold
+			// Sign-in or endpoint trouble, in the collector's own words
+			BarText {
+				width: agent.inner
+				visible: text !== ""
+				text: agent.modelData.authHelpText || agent.modelData.usageStatusText || ""
+				caps: false
+				wrapMode: Text.WordWrap
+				color: Colors.alert
+			}
+
+			Repeater {
+				model: agent.modelData.limits ?? []
+
+				Column {
+					id: limit
+
+					required property var modelData
+
+					width: agent.inner
+					spacing: 4
+					// Numbers kept past a failed check are shown, but dimmed
+					opacity: agent.modelData.limitsStale ? 0.5 : 1
+
+					Item {
+						width: parent.width
+						height: label.implicitHeight
+
+						BarText {
+							id: label
+
+							text: limit.modelData.label
+							color: Colors.structure
+						}
+						BarText {
+							anchors.right: parent.right
+							text: Math.round(limit.modelData.percent * 100) + "%"
+							color: mod.levelColor(limit.modelData.percent)
+						}
 					}
+
+					SegmentBar {
+						width: parent.width
+						height: 5
+						value: limit.modelData.percent
+						fillColor: limit.modelData.percent >= 0.8 ? mod.levelColor(limit.modelData.percent) : Colors.accent
+					}
+
 					BarText {
-						text: agent.modelData.tierLabel ?? ""
+						visible: text !== ""
+						text: mod.untilReset(limit.modelData.resetsAt ?? "")
 						color: Colors.muted
 					}
 				}
+			}
 
-				// Sign-in or endpoint trouble, in the collector's own words
-				BarText {
-					width: agent.inner
-					visible: text !== ""
-					text: agent.modelData.authHelpText || agent.modelData.usageStatusText || ""
-					caps: false
-					wrapMode: Text.WordWrap
-					color: Colors.alert
-				}
-
-				Repeater {
-					model: agent.modelData.limits ?? []
-
-					Column {
-						id: limit
-
-						required property var modelData
-
-						width: agent.inner
-						spacing: 4
-						// Numbers kept past a failed check are shown, but dimmed
-						opacity: agent.modelData.limitsStale ? 0.5 : 1
-
-						Item {
-							width: parent.width
-							height: label.implicitHeight
-
-							BarText {
-								id: label
-
-								text: limit.modelData.label
-								color: Colors.structure
-							}
-							BarText {
-								anchors.right: parent.right
-								text: Math.round(limit.modelData.percent * 100) + "%"
-								color: mod.levelColor(limit.modelData.percent)
-							}
-						}
-
-						SegmentBar {
-							width: parent.width
-							height: 5
-							value: limit.modelData.percent
-							fillColor: limit.modelData.percent >= 0.8 ? mod.levelColor(limit.modelData.percent) : Colors.accent
-						}
-
-						BarText {
-							visible: text !== ""
-							text: mod.untilReset(limit.modelData.resetsAt ?? "")
-							color: Colors.muted
-						}
-					}
-				}
-
-				BarText {
-					visible: (agent.modelData.todayPrompts ?? 0) > 0
-					text: "Today  " + mod.compact(agent.modelData.todayTotalTokens ?? 0) + " tokens  ·  " + agent.modelData.todayPrompts + " prompts"
-					color: Colors.fgDim
-				}
+			// Agents that report no token counts (agy) show prompts only
+			BarText {
+				visible: (agent.modelData.todayPrompts ?? 0) > 0
+				text: "Today  " + ((agent.modelData.todayTotalTokens ?? 0) > 0 ? mod.compact(agent.modelData.todayTotalTokens) + " tokens  ·  " : "") + agent.modelData.todayPrompts + " prompts"
+				color: Colors.fgDim
 			}
 		}
 

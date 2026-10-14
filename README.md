@@ -11,7 +11,8 @@ What you get:
 
 - **Quickshell** as the only shell: bar, keyboard-driven panels (network,
   bluetooth, audio, battery, media, system, notifications with history and
-  Do not disturb, power), privacy indicators that appear only while the mic,
+  Do not disturb, power, AI usage with a tab per agent in use, paged with
+  Q / E), privacy indicators that appear only while the mic,
   camera or screen are in use, OSD, notifications, the wallpaper and the
   polkit agent.
 - **walker + elephant** as the launcher, clipboard, file search and emoji picker.
@@ -146,8 +147,10 @@ examples/user.lua  the per-machine settings, documented
 - The code and config in this repo: MIT, see [LICENSE](LICENSE).
 - Rajdhani (`home/.local/share/fonts/Rajdhani`): Indian Type Foundry, SIL Open
   Font License, see the `OFL.txt` next to it.
-- `agent-usage` and its collectors are vendored from
-  [Omarchy](https://github.com/omacom/omarchy) (MIT).
+- `agent-usage` and `agent-usage-claude` are vendored from
+  [Omarchy](https://github.com/omacom/omarchy) (MIT); `agent-usage` was since
+  changed to leave out agents not in use. `agent-usage-agy` (Antigravity CLI)
+  is this repo's own.
 - The Neovim config starts from the LazyVim starter (Apache 2.0, see
   `home/.config/nvim/LICENSE`).
 - Cyberpunk 2077 and its UI are CD PROJEKT RED's. This is a fan-made desktop

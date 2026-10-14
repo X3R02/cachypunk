@@ -1,0 +1,146 @@
+#!/usr/bin/python3
+"""Print the Antigravity CLI (agy) usage record as JSON: agent-usage-agy [--force] [--limits-only]
+
+Not vendored: Omarchy ships no Antigravity collector. Same record shape as
+agent-usage-claude (id, name, limits[{label, percent, resetsAt}], ready...),
+so the panel needs nothing agent-specific.
+
+Limits come from `agy -p /usage --output-format json`, the CLI's own quota
+report: one group per model family (Gemini; Claude and GPT), each with a
+5-hour and a weekly bucket. It answers locally from the signed-in account,
+starts no conversation and spends no quota. The OAuth token is never read
+here; its file only has to exist, so a signed-out agy is reported as
+`ready: false` (hidden) instead of being launched into a browser sign-in.
+
+Prompt counts come from agy's own history.jsonl (slash commands excluded).
+agy reports no token counts, so todayTotalTokens stays 0.
+
+The arguments are accepted for the runner's sake and ignored: there is no
+cache to bypass and no local stats worth skipping.
+"""
+
+from __future__ import annotations
+
+import datetime as dt
+import json
+import os
+import shutil
+import subprocess
+import sys
+from pathlib import Path
+
+AGENT_ID = "agy"
+AGENT_NAME = "Antigravity"
+HOME = Path.home()
+DATA = HOME / ".gemini" / "antigravity-cli"
+STATE = Path(os.environ.get("XDG_STATE_HOME", HOME / ".local" / "state")) / "agent-usage" / f"{AGENT_ID}.json"
+WINDOW_LABELS = {"5h": "5-hour", "weekly": "weekly"}
+WINDOW_ORDER = {"5h": 0, "weekly": 1}
+
+
+def now() -> dt.datetime:
+  return dt.datetime.now(dt.timezone.utc)
+
+
+def group_label(name: str) -> str:
+  # "Gemini Models" -> "Gemini", "Claude and GPT models" -> "Claude+GPT":
+  # the label has to fit a 280 px panel row in tracked capitals
+  name = name.removesuffix(" Models").removesuffix(" models")
+  return name.replace(" and ", "+")
+
+
+def fetch_limits() -> list[dict]:
+  out = subprocess.run(
+    ["agy", "-p", "/usage", "--output-format", "json"],
+    cwd=HOME, capture_output=True, text=True, timeout=45, check=True,
+  ).stdout
+  data = json.loads(out)
+  if data.get("status") != "SUCCESS":
+    raise RuntimeError(data.get("status") or "no status")
+  limits = []
+  for group in data["command"]["data"]["groups"]:
+    buckets = sorted(group.get("buckets", []), key=lambda b: WINDOW_ORDER.get(b.get("window"), 9))
+    for b in buckets:
+      window = b.get("window", "")
+      limits.append({
+        "label": f"{group_label(group['name'])} {WINDOW_LABELS.get(window, window)}",
+        "percent": round(1 - float(b.get("remaining_fraction", 1)), 4),
+        "resetsAt": b.get("reset_time", ""),
+      })
+  return limits
+
+
+def today_prompts() -> int:
+  history = DATA / "history.jsonl"
+  if not history.exists():
+    return 0
+  today = dt.date.today()
+  count = 0
+  for line in history.read_text(errors="replace").splitlines():
+    try:
+      entry = json.loads(line)
+    except ValueError:
+      continue
+    if entry.get("type") == "slash_command":
+      continue
+    stamp = entry.get("timestamp")
+    if isinstance(stamp, (int, float)) and dt.datetime.fromtimestamp(stamp / 1000).date() == today:
+      count += 1
+  return count
+
+
+def record(**fields) -> dict:
+  base = {
+    "schemaVersion": 1,
+    "id": AGENT_ID,
+    "name": AGENT_NAME,
+    "tierLabel": "",
+    "ready": False,
+    "limits": [],
+    "limitsStale": False,
+    "authHelpText": "",
+    "usageStatusText": "",
+    "todayPrompts": 0,
+    "todayTotalTokens": 0,
+    "updatedAt": now().isoformat(),
+  }
+  base.update(fields)
+  return base
+
+
+def main() -> int:
+  # Not installed, or installed but never signed in: not an agent in use
+  if not shutil.which("agy") or not (DATA / "antigravity-oauth-token").exists():
+    print(json.dumps(record()))
+    return 0
+
+  prompts = today_prompts()
+  try:
+    limits = fetch_limits()
+  except (subprocess.SubprocessError, OSError, ValueError, KeyError, RuntimeError) as e:
+    print(f"agent-usage-agy: {e}", file=sys.stderr)
+    # Keep the last numbers, dimmed, rather than blanking the tab
+    try:
+      last = json.loads(STATE.read_text())
+    except (OSError, ValueError):
+      last = {}
+    print(json.dumps(record(
+      ready=True,
+      limits=last.get("limits", []),
+      limitsStale=bool(last.get("limits")),
+      usageStatusText="Couldn't read agy's quota; showing the last check.",
+      todayPrompts=prompts,
+    )))
+    return 0
+
+  print(json.dumps(record(
+    ready=True,
+    limits=limits,
+    limitsFetchedAt=int(now().timestamp() * 1000),
+    todayPrompts=prompts,
+  )))
+  return 0
+
+
+if __name__ == "__main__":
+  sys.exit(main())

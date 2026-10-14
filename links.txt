@@ -30,5 +30,6 @@
 .local/bin/hypr-kblayout-toggle
 .local/bin/agent-usage
 .local/bin/agent-usage-claude
+.local/bin/agent-usage-agy
 
 .local/share/fonts/Rajdhani
