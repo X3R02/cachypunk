@@ -132,6 +132,12 @@ Two documents decide how anything new should look:
   desktop applies it: surfaces, components, states, prominence tiers and the
   rules every theme keeps.
 
+## Working on it with an agent
+
+[`AGENTS.md`](AGENTS.md) holds the project's working notes for any coding
+agent or person: the rules, how designs are agreed and verified, and the
+traps already found. Add to it when you learn something the next one needs.
+
 ## Layout
 
 ```
