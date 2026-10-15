@@ -73,9 +73,10 @@ The repo ships what every agent shares: this skill and `machine-context`. What
 is specific to one agent on one machine is written by that agent, as plain
 files in its own global config, never symlinked by hand and never committed:
 
-- **Global instructions** (`~/.claude/CLAUDE.md`, `~/.gemini/AGENTS.md`,
-  `~/.codex/AGENTS.md`...): if missing, add a line saying desktop work goes
-  through the `cachypunk` skill. The user's personal preferences stay there.
+- **Global instructions** (`~/.claude/CLAUDE.md`, `~/.gemini/config/AGENTS.md`
+  for Antigravity CLI, `~/.codex/AGENTS.md`...): if missing, add a line
+  saying desktop work goes through the `cachypunk` skill. The user's personal
+  preferences stay there.
 - **Machine facts at session start** (optional; without it, run
   `machine-context` yourself): a SessionStart hook running
   `machine-context --claude-hook` (Claude Code, `~/.claude/settings.json`) or
