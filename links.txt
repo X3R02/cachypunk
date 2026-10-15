@@ -37,3 +37,9 @@
 .local/bin/agent-usage-kimi
 
 .local/share/fonts/Rajdhani
+
+# The agent skill: one source in .agents/skills, linked into each agent's
+# skills directory (the copies under .claude/ and .gemini/ are repo symlinks).
+.agents/skills/cachypunk
+.claude/skills/cachypunk
+.gemini/config/skills/cachypunk

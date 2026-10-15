@@ -31,6 +31,10 @@ Look-and-feel rules belong in `DESIGN-SYSTEM.md`, not here.
   step in `theme-set`), never hard-coded colours.
 - Hyprland config is Lua (`home/.config/hypr/lua/`): `binds.lua` is a pure
   keymap, programs in `programs.lua`, per-machine values in `user.lua`.
+- The `cachypunk` agent skill (`home/.agents/skills/cachypunk/`, Omarchy's
+  pattern) brings agents here from any directory; it is linked into
+  `~/.agents`, `~/.claude` and `~/.gemini/config` skills. It only routes to
+  this file, so rules live here, not there.
 
 ## Rules
 
