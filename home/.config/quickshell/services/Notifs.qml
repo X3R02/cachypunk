@@ -35,7 +35,9 @@ Singleton {
 	// shows, and a reload must not clear them or turn DND off. Kept as JSON
 	// text: a JS object can't move to the reloaded engine
 	readonly property var history: JSON.parse(persist.history || "[]")
-	readonly property int unread: persist.unread ?? 0
+	// Counted from the history rather than kept as a tally, so a notification
+	// acted on from its card (and so gone from the history) stops counting
+	readonly property int unread: history.filter(e => e.time > persist.seen).length
 	readonly property bool dnd: persist.dnd ?? false
 	// Ids of live notifications whose card is gone (timed out or cleared)
 	readonly property var hidden: JSON.parse(persist.hidden || "{}")
@@ -45,7 +47,8 @@ Singleton {
 
 		reloadableId: "notifs"
 		property string history: "[]"
-		property int unread: 0
+		// When the panel was last opened (ms since the epoch)
+		property real seen: 0
 		property bool dnd: false
 		property string hidden: "{}"
 	}
@@ -55,14 +58,13 @@ Singleton {
 	}
 
 	function markRead(): void {
-		persist.unread = 0;
+		persist.seen = Date.now();
 	}
 
 	function clearHistory(): void {
 		for (const n of live.slice())
 			n.dismiss();
 		persist.history = "[]";
-		persist.unread = 0;
 		persist.hidden = "{}";
 	}
 
@@ -130,7 +132,6 @@ Singleton {
 				stale.dismiss();
 		}
 		persist.history = JSON.stringify(all.slice(0, historyLimit));
-		persist.unread += 1;
 	}
 
 	function timeout(n: var): int {
