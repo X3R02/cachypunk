@@ -181,9 +181,12 @@ Singleton {
 			root.record(n);
 			// Tracked either way, so its action stays usable from the history
 			n.tracked = true;
-			// Do not disturb: no card, unless it is critical
+			// Do not disturb: no card and no sound, unless it is critical
 			if (root.dnd && n.urgency !== NotificationUrgency.Critical)
 				root.hide(n);
+			else
+				// The per-machine sound in ~/.config/cachypunk/sounds, if any
+				Quickshell.execDetached([Quickshell.shellDir + "/scripts/notify-sound.sh"]);
 		}
 	}
 }

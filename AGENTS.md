@@ -17,8 +17,10 @@ Look-and-feel rules belong in `DESIGN-SYSTEM.md`, not here.
   A new file goes under `home/` plus a line in `links.txt` (and `packages/`
   if it needs a package). See README for install/update/link/status.
 - Nothing personal in the repo: per-machine values go in
-  `~/.config/cachypunk/user.lua` (documented in `examples/user.lua`) and
-  `~/.config/cachypunk/wallpapers/`.
+  `~/.config/cachypunk/user.lua` (documented in `examples/user.lua`),
+  `~/.config/cachypunk/wallpapers/` and `~/.config/cachypunk/sounds/`
+  (`notification.*`, played by the shell on each card; game audio stays out
+  of the public repo).
 - Design documents, read before anything visual:
   - `home/.config/matugen/STYLEGUIDE.md`: Cyberpunk 2077's own UI, the target.
   - `home/.config/matugen/DESIGN-SYSTEM.md`: how this desktop applies it;
@@ -132,6 +134,9 @@ Look-and-feel rules belong in `DESIGN-SYSTEM.md`, not here.
   Lists that rescan need `ScriptModel` or the cursor is lost. Services
   (Networking, Bluetooth...) initialise lazily. `top` is a FINAL property of
   `Item`, don't declare it. QML JS has no `Array.flat`.
+- `Notifs.qml` calling a helper added in a later edit failed with "is not a
+  function" across reloads (the kept `NotificationServer` held the old
+  `root`): keep `onNotification` self-contained or restart `qs`.
 - `pkill -f <pattern>` matches the agent's own shell command line: kill by
   pid or `-x` name.
 - Long one-liners pasted into the user's terminal wrap and break: hand over a

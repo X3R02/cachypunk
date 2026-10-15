@@ -108,6 +108,9 @@ Nothing personal lives in the repo. Each machine keeps its own in
   [`examples/user.lua`](examples/user.lua) for every field.
 - `wallpapers/<theme>.jpg` (or `.png`): your image for that theme. Without one,
   `theme-set` draws a plain wallpaper from the palette.
+- `sounds/notification.*` (optional; ogg, wav, flac or mp3): played on each
+  notification, except under do not disturb. Without one, notifications are
+  silent and nothing else changes.
 - `modules`: the optional modules this machine uses.
 
 ## Themes
