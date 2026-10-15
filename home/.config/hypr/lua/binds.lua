@@ -50,16 +50,6 @@ k.super("PERIOD", progs.walker("symbols"), "Emojis")
 -- file, so it always lists the binds actually loaded.
 k.super("K", hl.dsp.exec_cmd("hypr-keybinds"), "Keybinding cheatsheet")
 
--- The now-playing panel (any MPRIS player: music, videos, browser tabs). On
--- the direct tier, not with the SUPER + CTRL panels: those are system
--- settings, this is something you summon, like the launcher
-k.super("M", progs.panel("media"), "Media player")
-
--- The notification history, with the Do not disturb switch at its top
-k.super("N", progs.panel("notifications"), "Notifications")
-
--- The AI agents' usage limits, one tab per agent in use (Q / E page them)
-k.super("A", progs.panel("agents"), "AI usage")
 
 -- One bind per app, keyed by the letter in programs.apps.
 for key, app in pairs(progs.apps) do
@@ -125,7 +115,7 @@ k.shift("F", hl.dsp.window.fullscreen({ mode = "fullscreen", action = "toggle" }
 k.shift("M", hl.dsp.window.fullscreen({ mode = "maximized", action = "toggle" }), "Maximize the window")
 
 ---------------------------------------------------------------------
--- SUPER + CTRL - hardware, display, session
+-- SUPER + CTRL - hardware, display, session, and the bar's panels
 ---------------------------------------------------------------------
 
 k.ctrl("L", hl.dsp.exec_cmd("hyprlock"), "Lock the screen")
@@ -136,8 +126,10 @@ k.ctrl("L", hl.dsp.exec_cmd("hyprlock"), "Lock the screen")
 -- hypridle.conf, so the normal timeouts return as soon as it is switched off.
 k.ctrl("I", hl.dsp.exec_cmd("hypridle-toggle"), "Toggle the auto-lock")
 
+-- Escape, the way out: M went to the media panel. Log out in the power menu
+-- does the same
 k.ctrl(
-	"M",
+	"Escape",
 	hl.dsp.exec_cmd("command -v hyprshutdown >/dev/null 2>&1 && hyprshutdown || hyprctl dispatch 'hl.dsp.exit()'"),
 	"Exit Hyprland"
 )
@@ -145,20 +137,31 @@ k.ctrl(
 -- The bar's session menu (lock, suspend, log out, restart, shut down)
 k.ctrl("P", progs.panel("power"), "Power menu")
 
-k.ctrl("N", hl.dsp.exec_cmd("hyprsunset-toggle"), "Toggle the night light")
+-- S for sunset (hyprsunset): N went to the notifications panel
+k.ctrl("S", hl.dsp.exec_cmd("hyprsunset-toggle"), "Toggle the night light")
 
 -- Cycle the xkb layout on every keyboard at once, through the layouts set in
 -- user.lua (keyboard_layout); the script is what flips them, because hl.dsp
 -- has no dispatcher for xkb.
 k.ctrl("K", hl.dsp.exec_cmd("hypr-kblayout-toggle"), "Switch the keyboard layout")
 
--- The bar's panels; nm-connection-editor, bluetui and wiremix are each
--- behind their panel's "Advanced" row (battery has none)
+-- The bar's panels. Every panel that hangs from the bar lives on this tier,
+-- keyed by its segment, whatever it shows: the bar is the system's
+-- dashboard, and one tier for one surface is what makes them findable.
+-- SUPER stays for launching and navigating. nm-connection-editor, bluetui
+-- and wiremix are each behind their panel's "Advanced" row (battery has none)
 k.ctrl("W", progs.panel("network"), "Network settings")
 k.ctrl("B", progs.panel("bluetooth"), "Bluetooth settings")
-k.ctrl("A", progs.panel("volume"), "Audio settings")
+-- V for volume: A is the AI usage panel
+k.ctrl("V", progs.panel("volume"), "Audio settings")
 -- E for energy: B and P are taken by bluetooth and the power menu
 k.ctrl("E", progs.panel("battery"), "Battery settings")
+-- Now playing, from any MPRIS player (music, videos, browser tabs)
+k.ctrl("M", progs.panel("media"), "Media player")
+-- The notification history, with the Do not disturb switch at its top
+k.ctrl("N", progs.panel("notifications"), "Notifications")
+-- The AI agents' usage limits, paged with Q / E
+k.ctrl("A", progs.panel("agents"), "AI usage")
 -- The system's look: the colour theme switcher
 k.ctrl("T", progs.themes(), "Theme switcher")
 k.ctrl("D", progs.wallpapers(), "Wallpaper picker")

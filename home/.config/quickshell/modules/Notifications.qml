@@ -1,5 +1,5 @@
 // Notifications: a bell with the count of unread ones, struck through while
-// Do not disturb is on. Click (or SUPER + N) opens the panel: the Do not
+// Do not disturb is on. Click (or SUPER + CTRL + N) opens the panel: the Do not
 // disturb switch, the latest notifications as cards (the game's journal: app
 // and age as the label, the title, the body under it) and "Clear all" as the
 // last row. There is no "Advanced": the history lives here and nowhere else.

@@ -210,7 +210,9 @@ One set of states for every entry (`EntryFrame.qml`), from CDPR's guide:
 - **Advanced is the escape hatch**: every panel ends in one row that opens
   the full tool (nm-connection-editor, bluetui, wiremix). A TUI is never a
   panel's main path.
-- Keybinds open surfaces through `progs.panel(name)` / `progs.themes()`;
+- **Every bar panel opens from `SUPER + CTRL + <key>`**, keyed by its
+  segment (media, notifications and AI usage included): one tier for one
+  surface. Keybinds open surfaces through `progs.panel(name)` / `progs.themes()`;
   outside code talks to the shell only through `qs ipc call`.
 
 ## 7. Where things live

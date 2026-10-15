@@ -31,7 +31,7 @@ Module {
 			model: [
 				{ icon: "󰌾", label: "Lock", cmd: ["loginctl", "lock-session"] },
 				{ icon: "󰤄", label: "Suspend", cmd: ["systemctl", "suspend"] },
-				// Same command as SUPER + CTRL + M
+				// Same command as SUPER + CTRL + Escape
 				{ icon: "󰍃", label: "Log out", question: "Log out of this session? Open apps will close.", cmd: ["sh", "-c", "command -v hyprshutdown >/dev/null 2>&1 && hyprshutdown || hyprctl dispatch 'hl.dsp.exit()'"] },
 				{ icon: "󰜉", label: "Restart", question: "Restart the system? Unsaved work in open apps will be lost.", cmd: ["systemctl", "reboot"] },
 				{ icon: "󰐥", label: "Shut down", question: "Shut down the system? Unsaved work in open apps will be lost.", cmd: ["systemctl", "poweroff"] }

@@ -11,7 +11,7 @@ What you get:
 
 - **Quickshell** as the only shell: bar, keyboard-driven panels (network,
   bluetooth, audio, battery, media, system, notifications with history and
-  Do not disturb, power, AI usage (`SUPER + A`) for every agent in use,
+  Do not disturb, power, AI usage for every agent in use,
   paged with Q / E like the game's menus), privacy indicators that appear only while the mic,
   camera or screen are in use, OSD, notifications, the wallpaper and the
   polkit agent.
@@ -29,8 +29,9 @@ What you get:
 
 ![walker launcher](docs/screenshots/launcher.jpg)
 
-**Panels**, one per bar segment, driven from the keyboard: media (`SUPER + M`),
-audio, battery and power profiles, session.
+**Panels**, one per bar segment, driven from the keyboard and all opened
+with `SUPER + CTRL + <key>`: media (`M`), audio (`V`), battery and power
+profiles (`E`), session (`P`).
 
 ![Media, audio, battery and power panels](docs/screenshots/panels.png)
 
