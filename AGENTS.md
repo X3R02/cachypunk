@@ -92,6 +92,10 @@ Look-and-feel rules belong in `DESIGN-SYSTEM.md`, not here.
 
 ## Verify against the running system
 
+- A pre-commit hook (`.githooks/`, enabled by `cachypunk link`) refuses
+  staged QML with syntax errors, which would stop the whole shell at login.
+  Use Qt 6's `/usr/lib/qt6/bin/qmllint`: `/usr/bin/qmllint` is Qt 5's, and
+  only `[syntax]` matters (the rest is mostly Quickshell false positives).
 - Quickshell: errors with `timeout 3 qs log`. Open a panel with
   `qs ipc call panel toggle <name>`, then **wait until `hyprctl layers -j`
   lists namespace `quickshell-panel`** before sending keys with

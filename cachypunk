@@ -120,6 +120,8 @@ link_all() {
 	done <"$REPO/links.txt"
 	# This script itself, so `cachypunk update` works from anywhere
 	ln -sfn "$REPO/cachypunk" "$HOME/.local/bin/cachypunk"
+	# The repo's own hooks (.githooks/pre-commit checks QML syntax)
+	git -C "$REPO" config core.hooksPath .githooks
 	if [ "$moved" -gt 0 ]; then
 		say "Links: $linked created, $moved existing files moved to $backup"
 	else

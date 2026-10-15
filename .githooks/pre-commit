@@ -1,0 +1,40 @@
+#!/bin/bash
+# Refuse a commit whose staged QML has a syntax error.
+#
+# One broken file stops Quickshell from loading at all: no bar, notifications,
+# wallpaper or polkit agent. A config reload keeps the previous config
+# running, so the break only shows at the next login, or on another machine
+# after `cachypunk update`.
+#
+# Only [syntax] counts: qmllint's other warnings are mostly false positives
+# for Quickshell (its singletons and some of its types are invisible to it).
+# The staged content is checked, not the working tree, so a partial stage is
+# judged as committed. Enabled by `cachypunk link` (core.hooksPath).
+
+set -uo pipefail
+
+qmllint=/usr/lib/qt6/bin/qmllint
+if [ ! -x "$qmllint" ]; then
+	echo "pre-commit: $qmllint missing (qt6-declarative), QML not checked" >&2
+	exit 0
+fi
+
+tmp=$(mktemp -d)
+trap 'rm -rf "$tmp"' EXIT
+
+failed=0
+while IFS= read -r -d '' path; do
+	staged="$tmp/$(basename "$path")"
+	git show ":$path" >"$staged"
+	errors=$("$qmllint" "$staged" 2>&1 | grep '\[syntax\]')
+	if [ -n "$errors" ]; then
+		printf '%s\n' "${errors//$staged/$path}" >&2
+		failed=1
+	fi
+done < <(git diff --cached --name-only --diff-filter=ACMR -z -- '*.qml')
+
+if [ "$failed" = 1 ]; then
+	echo "pre-commit: QML syntax errors, commit refused (git commit --no-verify to override)" >&2
+	exit 1
+fi
+exit 0
