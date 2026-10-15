@@ -10,7 +10,7 @@
 //   *.qml            shared pieces: Theme, Colors, the card shapes, Module (a
 //                    bar segment), Panel and its entries (PanelButton,
 //                    PanelRow, PanelSlider, PanelHeading, PanelDivider),
-//                    PanelTabs (folder tabs on a panel's top edge, Q / E)
+//                    PanelHeader (a panel's tab strip, Q / E)
 //   modules/         one file per bar segment, each owning its panel
 //   services/        singletons holding state and actions: Audio,
 //                    Brightness, Osd, Notifs, Wallpaper, Confirm, Themes

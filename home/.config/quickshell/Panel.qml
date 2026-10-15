@@ -15,10 +15,10 @@
 // `takeCursor(this)` on hover, so mouse and keyboard share one cursor.
 // PanelButton, PanelRow and PanelSlider are the stock entries. On open the
 // cursor starts on the entry marked `preferred: true`, else on the first.
-// A panel with tabs sets `tabIcons` (one glyph per tab) and follows
-// `tabIndex`: the card's top edge then rises into folder tabs (PanelTabs),
-// which come first under Up/Down and also page with Q / E, the game's
-// bumpers; a cursor left on content the new tab hid goes back to the top.
+// A panel with tabs sets `tabIcons` / `tabLabels` (one glyph and name per
+// tab) and follows `tabIndex`: a PanelHeader, the game's menu header strip,
+// then opens its content and pages with Q / E, the game's bumpers; a cursor
+// left on content the new tab hid goes back to the top.
 import Quickshell
 import Quickshell.Wayland
 import QtQuick
@@ -36,9 +36,10 @@ PanelWindow {
 	// Tells entries they live in a Panel and should follow `cursor`
 	readonly property bool keyboardNav: true
 	property Item cursor: null
-	// One glyph per tab, empty for a panel without tabs; tabIndex is the
-	// tab shown, set by the panel's owner and by the tabs themselves
+	// One glyph and name per tab, empty for a panel without tabs; tabIndex is
+	// the tab shown, set by the panel's owner and by the header itself
 	property var tabIcons: []
+	property var tabLabels: []
 	property int tabIndex: 0
 
 	// Where the module sits on the bar, taken when the panel opens
@@ -55,8 +56,6 @@ PanelWindow {
 				walk(child);
 			}
 		};
-		if (tabStrip.visible)
-			walk(tabStrip);
 		walk(body);
 		return found;
 	}
@@ -191,28 +190,24 @@ PanelWindow {
 			// edge line by popupGap
 			x: Math.round(Math.max(0, Math.min(panel.targetX + panel.target.width / 2 - width / 2, keys.width - width)))
 			y: Theme.popupGap
-			tabHeight: tabStrip.visible ? tabStrip.tabHeight : -1
-			tabLength: tabStrip.visible ? tabStrip.topX(tabStrip.count) : -1
-			tabRun: tabStrip.visible ? tabStrip.run : -1
 
 			Column {
 				id: body
 
 				// Each entry is its own framed card, as the game stacks them
 				spacing: Theme.entrySpacing
+
+				PanelHeader {
+					id: tabStrip
+
+					visible: count > 0
+					icons: panel.tabIcons
+					labels: panel.tabLabels
+					currentIndex: panel.tabIndex
+					onSelected: index => panel.tabIndex = index
+				}
 			}
 		}
 
-		// Inside the frame's raised top edge, over the cell
-		PanelTabs {
-			id: tabStrip
-
-			visible: count > 0
-			x: frame.x + frame.cellX
-			y: frame.y
-			icons: panel.tabIcons
-			currentIndex: panel.tabIndex
-			onSelected: index => panel.tabIndex = index
-		}
 	}
 }

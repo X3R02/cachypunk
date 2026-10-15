@@ -4,9 +4,9 @@
 // Omarchy's agents panel (some prompts, limits, balance or signed-in plan). The only
 // per-agent knowledge here is each one's tab glyph (`icons`, the robot for
 // any other). The bar shows the limit closest to running out across all of
-// them; click opens the panel with one folder tab per agent on the card's
-// top edge (PanelTabs: click or Enter on a tab, Left/Right on it, or Q / E
-// anywhere), showing that agent's limits and when each one resets.
+// them; click opens the panel with a header strip that pages through the
+// agents (PanelHeader: Q / E, or a click on a neighbour or a key box),
+// showing that agent's limits and when each one resets.
 import Quickshell
 import Quickshell.Io
 import QtQuick
@@ -116,11 +116,12 @@ Module {
 			mod.refresh(["--limits-only"])
 
 		tabIcons: mod.records.map(r => mod.icons[r.id] ?? "󰚩")
+		tabLabels: mod.records.map(r => r.name)
 		tabIndex: mod.currentIndex
 		onTabIndexChanged: mod.currentId = mod.records[tabIndex]?.id ?? ""
 
-		// The current tab's agent; only one is ever drawn. The tabs stay put
-		// (a carousel), so the content is what moves: it slides in from the
+		// The current tab's agent; only one is ever drawn. The header keeps
+		// the current agent centred (a carousel), so the content is what moves: it slides in from the
 		// side it was paged towards
 		Column {
 			id: agent
@@ -175,18 +176,10 @@ Module {
 			bottomPadding: 6
 			spacing: 6
 
-			// The tabs show only glyphs, so the agent is named here
-			Row {
-				spacing: 8
-
-				BarText {
-					text: agent.modelData.name ?? ""
-					color: Colors.accent
-				}
-				BarText {
-					text: agent.modelData.tierLabel ?? ""
-					color: Colors.muted
-				}
+			BarText {
+				visible: text !== ""
+				text: agent.modelData.tierLabel ? agent.modelData.tierLabel + " plan" : ""
+				color: Colors.muted
 			}
 
 			// Sign-in or endpoint trouble, in the collector's own words

@@ -94,7 +94,7 @@ Rules:
 | Component | File | Use | Contains |
 |---|---|---|---|
 | Module | `Module.qml` | one bar segment | icon, value |
-| PanelTabs | `PanelTabs.qml` (placed by `Panel`) | pages of one panel that hold the same kind of content (one per AI agent) | one glyph per tab |
+| PanelHeader | `PanelHeader.qml` (placed by `Panel`) | pages of one panel that hold the same kind of content (one per AI agent) | key boxes, neighbour glyphs, current glyph + name |
 | PanelHeading | `PanelHeading.qml` | names a group in a panel | text only |
 | PanelRow | `PanelRow.qml` | one item of a list where one or more are *active* | icon, label, badge glyph, chip or detail |
 | PanelButton | `PanelButton.qml` | an action (Lock, Advanced, Back) | icon, label |
@@ -107,40 +107,29 @@ Rules:
 
 Nesting rules:
 
-- A **Panel** contains, top to bottom: optional tabs on its top edge (PanelTabs) →
+- A **Panel** contains, top to bottom: optional header strip (PanelHeader) →
   optional toggle (PanelButton) → headings with their rows and sliders →
   divider → `Advanced` (PanelButton, always last, opens the full tool).
   Nothing else.
-- **PanelTabs** are the card's own tab grown into folder tabs, like the
-  tabs of a folder icon, not a row of buttons: the raised stretch of the
-  panel card's top edge widens to one wide, low tab per item. Neighbours
-  share 45° dividers and the edge steps down after the last at 45°. **The
-  strip is a carousel**: the current tab is always the first, in front,
-  with the card's straight left edge, and the others follow in order behind
-  it, wrapping. Changing tab rotates the glyphs; the tab shapes stay put
-  and the content slides in from the side it was paged towards.
-  At mid height the current tab is 72 px wide and the tabs behind it a
-  little narrower (60 px), each glyph centred there.
-  Tried and rejected (2026-10-14): every divider leaning (the current tab
-  sat between two slants), the current tab standing in place in the row
-  (superseded by the carousel), straight vertical dividers everywhere, separate
-  tabs with a gap, and a steeper slant (0.4 x the height) — 45° won once
-  the front tab stood straight.
-  Each tab holds a glyph only (the item is named in the content below).
-  Tabs break the entry states on purpose: the current tab takes **no
-  fill** — it keeps the card's dark backing and an open floor, joined to
-  the body like a folder, so tab and content read as one surface — and is
-  told apart only by its glyph in `accent`, the others `muted` and closed
-  off by a `line` stroke. Focus touches neither fill nor edges (they stay
-  the frame's 1 px `line`, like the rest of the popup): it turns the glyph
-  `fg`. Tried and rejected (2026-10-14): a filled current tab (it split
-  the tab from the content) and `structure` edges on focus (they read
-  heavier than everything else in the popup). Use tabs when a panel
-  would otherwise repeat the same block once per item (agents, accounts):
-  only the current tab's content is drawn, so the panel keeps one height
-  however many items there are. Whatever sits below (Refresh, Advanced)
-  belongs to the whole panel, not to a tab. A panel opts in with
-  `tabIcons` / `tabIndex`; `Panel` draws the tabs and raises the edge.
+- **PanelHeader** is the game's menu header strip (STYLEGUIDE.md section 6),
+  the first row inside the card: Q and E in small `accent` boxes at both
+  ends (the game's bumper glyphs, `muted` with a single tab), the current
+  tab's glyph and name centred in `accent` caps, and its neighbours'
+  glyphs in `structure` at 50% either side. It is a carousel: the current
+  tab stays centred and the others rotate through the sides (two tabs:
+  the other on the right only; more: previous left, next right, the rest
+  off-strip). It is not an entry — no frame, no cursor stop — and the card
+  keeps its usual decorative tab. Use it when a panel would otherwise
+  repeat the same block once per item (agents, accounts): only the current
+  tab's content is drawn, and it slides in from the side it was paged
+  towards. Whatever sits below (Refresh, Advanced) belongs to the whole
+  panel. A panel opts in with `tabIcons` / `tabLabels` / `tabIndex`.
+  **Rejected (2026-10-14), after many rounds:** folder tabs drawn on the
+  card's top edge, in every shape (45° or steep dividers, straight
+  dividers, gaps, a front tab, a carousel of them). The card's tab is
+  decoration in the game, never navigation, so any navigation built on it
+  reads as borrowed. Before inventing a component, look for what the game
+  itself uses for the job.
 - A **PanelRow** holds at most one Chip *or* one detail, never both. A state
   is a Chip; a number (signal %, battery %) is a detail.
 - A **Chip** never contains an icon and is never a button.
@@ -197,14 +186,12 @@ One set of states for every entry (`EntryFrame.qml`), from CDPR's guide:
   Up/Down (j/k, Tab) move, Enter/Space activate, Left/Right (h/l) adjust or
   move sideways, Delete is the secondary action, Escape closes or goes back.
 - **Tabs page like the game**: Q / E go to the previous / next tab from
-  anywhere in the panel, wrapping; a tab also switches on click, on Enter
-  with the cursor on it, and with Left/Right while focused. Paging with the
-  cursor on a tab carries it to the new tab; a cursor left on content the
-  new tab hid goes back to the top. The panel opens on the tab last shown.
+  anywhere in the panel, wrapping; a click on a neighbour glyph or a key
+  box pages too. A cursor left on content the new tab hid goes back to the
+  top. The panel opens on the tab last shown.
 - **A panel opens with its cursor placed**: on the entry marked
-  `preferred: true` when there is an obvious first action (media: play/pause;
-  a tabbed panel: its current tab), otherwise on the first entry from the
-  top. Never on nothing.
+  `preferred: true` when there is an obvious first action (media:
+  play/pause), otherwise on the first entry from the top. Never on nothing.
 - **Destructive actions confirm** in a modal (log out, restart, shut down)
   with BACK focused by default. Reversible actions don't (lock, suspend).
 - **Forgetting or removing an item** takes a second press of the secondary
