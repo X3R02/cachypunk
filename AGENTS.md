@@ -34,7 +34,10 @@ Look-and-feel rules belong in `DESIGN-SYSTEM.md`, not here.
 - The `cachypunk` agent skill (`home/.agents/skills/cachypunk/`, Omarchy's
   pattern) brings agents here from any directory; it is linked into
   `~/.agents`, `~/.claude` and `~/.gemini/config` skills. It only routes to
-  this file, so rules live here, not there.
+  this file, so rules live here, not there. `machine-context` gives agents
+  the live machine facts. Per-agent setup (global instructions, hooks) is
+  written by each agent as plain files, as the skill describes; never
+  hand-made symlinks outside `links.txt`.
 
 ## Rules
 

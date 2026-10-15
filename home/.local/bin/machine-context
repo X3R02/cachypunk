@@ -1,0 +1,102 @@
+#!/bin/bash
+# Print live facts about this machine for an agent's context.
+#
+#   machine-context                plain text
+#   machine-context --claude-hook  Claude Code SessionStart hook JSON
+#   machine-context --agy-hook     Antigravity CLI SessionStart hook JSON
+#
+# A script rather than static text in the agents' instructions, so the facts
+# are read from the running system every session - correct after a hardware
+# change, a distro upgrade, or on a different machine entirely.
+#
+# Every lookup is guarded: a missing tool or a non-Hyprland session degrades to
+# fewer lines rather than failing the hook.
+
+set -uo pipefail
+
+format=${1:-text}
+
+buf=""
+emit() { buf+="$1"$'\n'; }
+line() { [ -n "${2:-}" ] && emit "$(printf '%s: %s' "$1" "$2")"; }
+
+host=$(hostnamectl hostname 2>/dev/null || cat /etc/hostname 2>/dev/null)
+os=$(. /etc/os-release 2>/dev/null && printf '%s' "${PRETTY_NAME:-$NAME}")
+kernel=$(uname -r 2>/dev/null)
+model=$(cat /sys/devices/virtual/dmi/id/product_version 2>/dev/null)
+sku=$(cat /sys/devices/virtual/dmi/id/product_name 2>/dev/null)
+vendor=$(cat /sys/devices/virtual/dmi/id/sys_vendor 2>/dev/null)
+cpu=$(awk -F': ' '/^model name/{print $2; exit}' /proc/cpuinfo 2>/dev/null)
+chassis=$(hostnamectl chassis 2>/dev/null)
+
+emit "## Machine (live, from machine-context)"
+line "host" "$host"
+line "os" "$os"
+line "kernel" "$kernel"
+line "hardware" "$(printf '%s %s' "$vendor" "$model" | xargs) ${sku:+($sku)}"
+line "cpu" "$cpu"
+line "chassis" "$chassis"
+
+# Battery presence is the reliable signal for "is this a laptop", independent of
+# what DMI claims.
+if compgen -G "/sys/class/power_supply/BAT*" >/dev/null; then
+	emit "power: has battery (laptop - prefer power-aware defaults)"
+fi
+
+# Compositor / display. Only meaningful inside a graphical session.
+if command -v hyprctl >/dev/null 2>&1 && [ -n "${HYPRLAND_INSTANCE_SIGNATURE:-}" ]; then
+	line "compositor" "Hyprland $(hyprctl version 2>/dev/null | awk 'NR==1{print $2}')"
+	mons=$(hyprctl monitors -j 2>/dev/null | python3 -c '
+import json, sys
+try:
+    ms = json.load(sys.stdin)
+except Exception:
+    sys.exit(0)
+for m in ms:
+    print("monitor: %s %dx%d@%.0f scale %.2f%s" % (
+        m.get("name", "?"), m.get("width", 0), m.get("height", 0),
+        m.get("refreshRate", 0), m.get("scale", 1),
+        " (focused)" if m.get("focused") else ""))
+' 2>/dev/null)
+	[ -n "$mons" ] && emit "$mons"
+	kb=$(hyprctl getoption input:kb_layout -j 2>/dev/null | python3 -c 'import json,sys; print(json.load(sys.stdin).get("str","").strip())' 2>/dev/null)
+	line "keyboard layout" "$kb"
+	layout=$(hyprctl getoption general:layout -j 2>/dev/null | python3 -c 'import json,sys; print(json.load(sys.stdin).get("str","").strip())' 2>/dev/null)
+	line "hyprland layout" "$layout"
+elif [ -n "${WAYLAND_DISPLAY:-}" ]; then
+	line "session" "Wayland (${XDG_CURRENT_DESKTOP:-unknown})"
+elif [ -n "${DISPLAY:-}" ]; then
+	line "session" "X11 (${XDG_CURRENT_DESKTOP:-unknown})"
+fi
+
+# From passwd, not $SHELL: $SHELL reports whatever spawned this hook, which is
+# not necessarily the user's login shell.
+line "login shell" "$(getent passwd "$(id -un)" 2>/dev/null | cut -d: -f7)"
+
+# python3 does the JSON encoding so a value containing a quote, a backslash or a
+# newline can't produce malformed output and silently kill the injection.
+case $format in
+text) printf '%s' "$buf" ;;
+--claude-hook | --agy-hook)
+	printf '%s' "$buf" | python3 -c '
+import json, sys
+text = sys.stdin.read().strip()
+if not text:
+    sys.exit(0)
+if sys.argv[1] == "--claude-hook":
+    out = {"hookSpecificOutput": {
+        "hookEventName": "SessionStart",
+        "additionalContext": text,
+    }}
+else:
+    out = {"injectSteps": [{"systemMessage": {"systemMessage": text}}]}
+json.dump(out, sys.stdout)
+' "$format"
+	;;
+*)
+	echo "usage: machine-context [--claude-hook | --agy-hook]" >&2
+	exit 2
+	;;
+esac
+
+exit 0

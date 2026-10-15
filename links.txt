@@ -35,6 +35,7 @@
 .local/bin/agent-usage-fireworks
 .local/bin/agent-usage-grok
 .local/bin/agent-usage-kimi
+.local/bin/machine-context
 
 .local/share/fonts/Rajdhani
 
