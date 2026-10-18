@@ -142,10 +142,11 @@ fi
 # Hyprland re-reads lua/theme.lua (and so the border colors) on reload
 hyprctl reload >/dev/null 2>&1
 
-# Already-open ghostty windows don't re-read their config on their own; this is
-# the same GTK action ctrl+shift+, triggers
-busctl --user call com.mitchellh.ghostty /com/mitchellh/ghostty \
-	org.gtk.Actions Activate "sava{sv}" "reload-config" 0 0 >/dev/null 2>&1
+# Already-open ghostty windows don't re-read their config on their own.
+# SIGUSR2 is ghostty's reload-config; a signal reaches every instance, while
+# the D-Bus action only reached com.mitchellh.ghostty and missed the bar's
+# floating terminals (--class=com.floatterm is a separate instance)
+pkill -USR2 -x ghostty
 
 # Folders in the theme's colour: theme-icons rebuilds the NightCity icon theme
 # (Adwaita with recoloured folders). Bounce the name so running apps reload it.
