@@ -16,7 +16,7 @@ What you get:
   camera or screen are in use, OSD, notifications, the wallpaper and the
   polkit agent.
 - **walker + elephant** as the launcher, clipboard, file search and emoji picker.
-- **matugen** with fixed palettes (`nightcity`, `militech`): `theme-set <name>`
+- **matugen** with fixed palettes (`nightcity`, `militech`, `mox`): `theme-set <name>`
   re-renders Hyprland, Quickshell, walker, GTK 3/4, Qt 5/6, ghostty, Neovim,
   hyprlock, SDDM, the icon theme and more, then reloads what is running.
 - An icon theme drawn from the same cards (folders and file types as labelled
