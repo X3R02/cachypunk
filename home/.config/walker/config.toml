@@ -3,6 +3,7 @@ theme = "matugen"          # rendered by matugen into themes/matugen/ (theme-set
 close_when_open = true     # the launcher bind toggles
 click_to_close = true
 selection_wrap = true
+global_argument_delimiter = "|"  # default "#" blocks any query containing it (hex colours)
 
 [placeholders]
 "default" = { input = "Search", list = "No results" }
@@ -10,3 +11,11 @@ selection_wrap = true
 "symbols" = { input = "Emoji", list = "No results" }
 "windows" = { input = "Window", list = "No windows" }
 "files" = { input = "File", list = "No results" }
+"menus:colors" = { input = "Hex colour", list = "Type a hex code" }
+
+
+# Typing "#" opens the live colour preview (elephant/menus/colors.lua).
+# walker merges prefixes by provider, so the defaults stay.
+[[providers.prefixes]]
+prefix = "#"
+provider = "menus:colors"

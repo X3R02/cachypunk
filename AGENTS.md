@@ -117,6 +117,10 @@ Look-and-feel rules belong in `DESIGN-SYSTEM.md`, not here.
 - SDDM: `QT_FORCE_STDERR_LOGGING=1 QT_QPA_PLATFORM=offscreen
   sddm-greeter-qt6 --test-mode --theme <dir>`.
 - elephant providers: `elephant query "provider;text;max;false"`.
+  A Lua menu is `menus:<name>` (`"menus;<name>:text"` scores the prefix
+  too and returns nothing); no results makes the CLI panic. Uncached Lua
+  menus get the typed text as `GetEntries(query)`, so they can be live
+  (`elephant/menus/colors.lua`), despite elephant's docs.
 - Polkit dialog: `hyprctl eval 'hl.exec_cmd("pkexec true")'` (pkexec from an
   agent's own shell never reaches the agent).
 
@@ -158,6 +162,8 @@ Look-and-feel rules belong in `DESIGN-SYSTEM.md`, not here.
   fills (state is painted as the interior); recolour SVGs by hue, rank-map
   greys; set `inactive.highlight.text.color` too. Decide the KeePassXC
   trade-off first.
+- walker skips the query entirely while the input contains
+  `global_argument_delimiter` (default `#`); ours is `|` so `#` hex works.
 - `walker --dmenu` closed without a pick is the normal path, not a failure:
   guard the call.
 - SDDM config colours are strings: dim with `opacity`, not `Qt.rgba(config.x)`.

@@ -15,7 +15,7 @@ What you get:
   paged with Q / E like the game's menus), privacy indicators that appear only while the mic,
   camera or screen are in use, OSD, notifications, the wallpaper and the
   polkit agent.
-- **walker + elephant** as the launcher, clipboard, file search and emoji picker.
+- **walker + elephant** as the launcher, clipboard, file search, emoji picker and a live hex colour preview (`#ff4d58`).
 - **matugen** with fixed palettes (`nightcity`, `militech`, `mox`, `breach`, `arasaka`): `theme-set <name>`
   re-renders Hyprland, Quickshell, walker, GTK 3/4, Qt 5/6, ghostty, Neovim,
   hyprlock, SDDM, the icon theme and more, then reloads what is running.
