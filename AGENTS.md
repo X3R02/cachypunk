@@ -169,6 +169,10 @@ Look-and-feel rules belong in `DESIGN-SYSTEM.md`, not here.
 - ghostty `--class=X` starts a separate instance with its own D-Bus name, so
   the `com.mitchellh.ghostty` reload action misses it: reload every terminal
   with `pkill -USR2 -x ghostty` (2026-10-18).
+- Obsidian enables CSS snippets per vault (`appearance.json`): a new vault
+  got `matugen.css` copied but stayed unthemed, so `theme-set` also turns it
+  on there. Vaults created later are themed on the next `theme-set`
+  (2026-10-21).
 - SDDM config colours are strings: dim with `opacity`, not `Qt.rgba(config.x)`.
 - The wl-clip-persist and wl-x11-clip-bridge user services feed XWayland apps
   and walker's clipboard history; keep them.

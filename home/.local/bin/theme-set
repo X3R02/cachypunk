@@ -166,12 +166,18 @@ gsettings set org.gnome.desktop.interface gtk-theme "$gtk_theme"
 touch "$HOME/.config/qt5ct/qt5ct.conf" "$HOME/.config/qt6ct/qt6ct.conf"
 
 # Obsidian has no global theme dir: drop the snippet into every known vault.
-# It hot-reloads snippets; enabling one is a per-vault toggle in Appearance.
+# It hot-reloads snippets, but enabling one is per vault, so turn it on in
+# appearance.json too, with the dark base it styles (.theme-dark only).
 jq -r '.vaults[].path' "$HOME/.config/obsidian/obsidian.json" 2>/dev/null |
 	while IFS= read -r vault; do
 		[ -d "$vault/.obsidian" ] || continue
 		mkdir -p "$vault/.obsidian/snippets"
 		cp "$HOME/.config/theme/obsidian.css" "$vault/.obsidian/snippets/matugen.css"
+		appearance="$vault/.obsidian/appearance.json"
+		[ -s "$appearance" ] || echo '{}' >"$appearance"
+		jq '.theme = "obsidian"
+			| .enabledCssSnippets = ((.enabledCssSnippets // []) - ["matugen"] + ["matugen"])' \
+			"$appearance" >"$appearance.tmp" && mv "$appearance.tmp" "$appearance"
 	done
 
 # Quickshell hot-reloads Colors.qml by itself. Firefox reads its symlinked
