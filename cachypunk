@@ -216,7 +216,7 @@ apply_modules() {
 			sudo "$HOME/.config/sddm/matugen/install.sh"
 			if ! systemctl is-enabled sddm.service >/dev/null 2>&1; then
 				warn "sddm is installed but not enabled. If no other login manager runs:"
-				warn "  sudo systemctl enable sddm.service"
+				warn "  systemctl enable sddm.service"
 			fi
 			;;
 		fingerprint)
@@ -224,7 +224,7 @@ apply_modules() {
 			;;
 		laptop)
 			say "Module laptop"
-			sudo systemctl enable --now tlp.service
+			systemctl enable --now tlp.service
 			;;
 		esac
 	done
