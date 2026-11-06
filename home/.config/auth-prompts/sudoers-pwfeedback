@@ -1,3 +1,0 @@
-# Installed by ~/.config/auth-prompts/install.sh: show an asterisk per key at
-# the password prompt, drawn inside the auth panel.
-Defaults pwfeedback

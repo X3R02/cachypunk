@@ -11,7 +11,6 @@
 .config/elephant
 .config/ghostty
 .config/sddm
-.config/auth-prompts
 .config/nvim
 .config/environment.d/10-qt.conf
 .config/fontconfig/fonts.conf

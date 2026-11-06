@@ -5,10 +5,10 @@ description: >
   Hyprland + Quickshell, styled after Cyberpunk 2077). Use when reading or
   editing anything in ~/.config/hypr, ~/.config/quickshell, ~/.config/matugen,
   ~/.config/walker, ~/.config/elephant, ~/.config/ghostty, ~/.config/sddm,
-  ~/.config/auth-prompts, ~/.config/cachypunk, or the cachypunk repo.
+  ~/.config/cachypunk, or the cachypunk repo.
   Triggers: Hyprland, keybindings, window rules, monitors, animations, bar,
   panels, widgets, OSD, notifications, launcher, themes, colors, wallpaper,
-  fonts, GTK/Qt look, lock screen, login screen, sudo/polkit prompts, idle,
+  fonts, GTK/Qt look, lock screen, login screen, polkit prompts, idle,
   night light, and "make it look like the game".
 ---
 

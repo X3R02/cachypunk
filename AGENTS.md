@@ -66,6 +66,10 @@ Look-and-feel rules belong in `DESIGN-SYSTEM.md`, not here.
   row; keyboard-driven (Up/Down/j/k, Enter, Left/Right, Delete, Escape; Q / E
   page a `PanelHeader`). Outside code reaches the shell only via `qs ipc call`.
 - **Prefer maintained projects** over hand-rolled scripts and rules.
+- **sudo stays stock**: the repo never touches PAM, sudoers or sudo's
+  catalogs. A styled sudo prompt (gettext catalogs plus pam_exec scripts run
+  as root) was built and removed (2026-11-06): custom root code in auth was
+  not worth a look. Privileged prompts are the polkit dialog's job.
 - Don't open or kill windows in the user's live session to test without
   asking. Back up a config before rewriting it.
 - **Public captures**: no network or bluetooth panels (SSIDs and device names
@@ -173,12 +177,6 @@ Look-and-feel rules belong in `DESIGN-SYSTEM.md`, not here.
   got `matugen.css` copied but stayed unthemed, so `theme-set` also turns it
   on there. Vaults created later are themed on the next `theme-set`
   (2026-10-21).
-- pam_fprintd leaves the terminal echoing while it waits: stray Enters moved
-  the cursor under the sudo card (redrawn by relative moves) and queued as
-  empty password attempts. `auth-prompts/quiet-tty` (pam_exec) turns echo
-  off and flushes input; `granted` turns it back on (2026-11-06). Canonical
-  mode goes off with it: ghostty shows its lock icon at the cursor whenever
-  a tty is canonical without echo.
 - SDDM config colours are strings: dim with `opacity`, not `Qt.rgba(config.x)`.
 - The wl-clip-persist and wl-x11-clip-bridge user services feed XWayland apps
   and walker's clipboard history; keep them.

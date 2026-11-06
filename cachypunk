@@ -12,7 +12,6 @@
 #
 # Optional modules (asked during install, remembered for update):
 #   sddm         login screen styled as the lock screen        (needs root)
-#   sudo-panel   sudo's fingerprint/password prompt as a panel (needs root)
 #   fingerprint  fprintd, for sudo, polkit and hyprlock
 #   laptop       TLP power management
 #
@@ -26,7 +25,7 @@ set -euo pipefail
 REPO=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
 STATE="$HOME/.config/cachypunk"
 MODULES_FILE="$STATE/modules"
-ALL_MODULES="sddm sudo-panel fingerprint laptop"
+ALL_MODULES="sddm fingerprint laptop"
 
 say() { printf '\033[1m::\033[0m %s\n' "$*"; }
 warn() { printf '\033[33m::\033[0m %s\n' "$*" >&2; }
@@ -188,7 +187,6 @@ choose_modules() {
 			for m in $ALL_MODULES; do
 				case $m in
 				sddm) ask "Module sddm: login screen styled as the lock screen?" && chosen+="$m," ;;
-				sudo-panel) ask "Module sudo-panel: sudo's prompt as a panel (replaces /etc/pam.d/sudo)?" && chosen+="$m," ;;
 				fingerprint) ask "Module fingerprint: fprintd for sudo, polkit and hyprlock?" && chosen+="$m," ;;
 				laptop) ask "Module laptop: TLP power management?" && chosen+="$m," ;;
 				esac
@@ -197,6 +195,12 @@ choose_modules() {
 	fi
 	mkdir -p "$STATE"
 	tr ',' '\n' <<<"$chosen" | grep -v '^$' | sort -u >"$MODULES_FILE" || true
+	# sudo-panel was removed (2026-11-06): drop it from older module lists
+	if grep -qx sudo-panel "$MODULES_FILE"; then
+		sed -i '/^sudo-panel$/d' "$MODULES_FILE"
+		warn "Module sudo-panel no longer exists. If it was installed, restore stock sudo:"
+		warn "  sudo mv /etc/pam.d/sudo.bak-auth-prompts /etc/pam.d/sudo"
+	fi
 	for m in $(cat "$MODULES_FILE"); do
 		[[ " $ALL_MODULES " == *" $m "* ]] || die "unknown module: $m (known: $ALL_MODULES)"
 	done
@@ -213,13 +217,6 @@ apply_modules() {
 			if ! systemctl is-enabled sddm.service >/dev/null 2>&1; then
 				warn "sddm is installed but not enabled. If no other login manager runs:"
 				warn "  sudo systemctl enable sddm.service"
-			fi
-			;;
-		sudo-panel)
-			say "Module sudo-panel: this replaces /etc/pam.d/sudo (the stock one is kept as sudo.bak-auth-prompts)"
-			warn "Keep a root shell open (sudo -s, in another terminal) until sudo works again"
-			if ask "Install it now?"; then
-				sudo "$HOME/.config/auth-prompts/install.sh"
 			fi
 			;;
 		fingerprint)

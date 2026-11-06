@@ -73,15 +73,11 @@ shows every keybinding.
 | Module | What it does | Root |
 |---|---|---|
 | `sddm` | the login screen, styled as the lock screen | yes |
-| `sudo-panel` | sudo's fingerprint and password prompts as one panel that updates in place; replaces `/etc/pam.d/sudo` (the original is kept as `sudo.bak-auth-prompts`) | yes |
 | `fingerprint` | fprintd, for sudo, polkit and hyprlock | no |
 | `laptop` | TLP power management (replaces power-profiles-daemon) | yes |
 
 Pick them non-interactively with `cachypunk install --modules sddm,laptop`.
 The choice is saved in `~/.config/cachypunk/modules` and reused by `update`.
-
-Before installing `sudo-panel`, keep a root shell open in another terminal
-(`sudo -s`) until you have checked that `sudo true` still works.
 
 ## Keep it in sync
 

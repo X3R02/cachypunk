@@ -19,14 +19,8 @@ PanelWindow {
 	// PAM tries the fingerprint first and only then asks for the password;
 	// the field shows up at that point, not before
 	readonly property bool wantsPassword: flow?.isResponseRequired ?? false
-	// PAM's note as one plain line. The fprintd catalog in ~/.config/auth-prompts/
-	// draws its prompts as a terminal card; keep only the "//" line, without
-	// colour and cursor codes or the card's tree and edge glyphs
-	readonly property string note: {
-		const lines = (flow?.supplementaryMessage ?? "").replace(/\x1b\[[0-9;]*[A-Za-z]/g, "").replace(/[│├└─╱]/g, "").split("\n");
-		const line = lines.find(l => l.includes("//")) ?? lines.find(l => l.trim() !== "") ?? "";
-		return line.trim().replace(/\s+/g, " ");
-	}
+	// PAM's note as one plain line
+	readonly property string note: (flow?.supplementaryMessage ?? "").trim().replace(/\s+/g, " ")
 	// Buttons read these to draw the mouse hover (no keyboard cursor here:
 	// the password field has the keyboard)
 	readonly property bool keyboardNav: false
