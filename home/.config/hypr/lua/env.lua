@@ -25,3 +25,8 @@ end
 -- editor this setup themes.
 hl.env("EDITOR", "nvim")
 hl.env("VISUAL", "nvim")
+
+-- No input method (fcitx/ibus) runs here, so GTK4's default "wayland" IM
+-- module never composes dead keys: AltGr+{ (dead_circumflex) typed "{" in
+-- ghostty. The "simple" module composes them in-process.
+hl.env("GTK_IM_MODULE", "simple")

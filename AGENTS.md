@@ -181,3 +181,6 @@ Look-and-feel rules belong in `DESIGN-SYSTEM.md`, not here.
   follows Omarchy's `providerHasData` rule (usage, limits, balance or a
   signed-in plan), not the `ready` flag (Codex sets it when not installed).
   The agy collector only runs `agy -p /usage` and never reads its token.
+- Dead keys (latam `^` is AltGr + the key right of Ñ) only compose in GTK4
+  apps with `GTK_IM_MODULE=simple` (`hypr/lua/env.lua`): with no fcitx/ibus,
+  the default wayland IM module types the base key instead (2026-10-19).
