@@ -41,10 +41,38 @@ PanelWindow {
 	WlrLayershell.namespace: "quickshell-themes"
 	WlrLayershell.keyboardFocus: open ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
 
+	// Put the active theme in the middle, without the slide: on opening, and
+	// again once Themes.reload() (asynchronous) brings a changed list. Waits a
+	// tick so the carousel has its width before it centres.
+	function focusCurrent(): void {
+		Qt.callLater(() => {
+			const i = Math.max(0, Themes.list.findIndex(t => t.name === Themes.current));
+			const duration = carousel.highlightMoveDuration;
+			carousel.highlightMoveDuration = 0;
+			carousel.currentIndex = i;
+			carousel.positionViewAtIndex(i, ListView.Center);
+			carousel.highlightMoveDuration = duration;
+		});
+	}
+
 	onOpenChanged: if (open) {
 		Themes.reload();
-		carousel.currentIndex = Math.max(0, Themes.list.findIndex(t => t.name === Themes.current));
+		focusCurrent();
 		keys.forceActiveFocus();
+	}
+
+	Connections {
+		target: Themes
+
+		function onListChanged(): void {
+			if (switcher.open)
+				switcher.focusCurrent();
+		}
+
+		function onCurrentChanged(): void {
+			if (switcher.open)
+				switcher.focusCurrent();
+		}
 	}
 
 	// Everything behind dims, as behind every modal

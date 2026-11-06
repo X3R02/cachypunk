@@ -40,7 +40,10 @@ Singleton {
 			onStreamFinished: {
 				try {
 					const data = JSON.parse(text);
-					root.list = data.themes;
+					// A new array resets every view on it (and its cursor):
+					// only replace the list when a palette actually changed
+					if (JSON.stringify(data.themes) !== JSON.stringify(root.list))
+						root.list = data.themes;
 					root.current = data.current || (data.themes[0]?.name ?? "");
 				} catch (e) {
 					// Keep the last good list
