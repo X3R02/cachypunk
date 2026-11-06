@@ -1,5 +1,7 @@
 #%PAM-1.0
 # Installed by ~/.config/auth-prompts/install.sh over the stock /etc/pam.d/sudo.
+# quiet-tty turns the terminal's echo off and drops typed-ahead keys, before
+# the scan (pam_fprintd leaves echo on) and again before the password.
 # Fingerprint first: on success the next line prints the ACCESS GRANTED panel
 # and ends auth (the script always exits 0); on any failure it is skipped and
 # the password path runs. A failed password dies inside system-auth
@@ -7,8 +9,10 @@
 # Both fingerprint lines carry chwd's tag: removing the fprint profile deletes
 # every tagged line, and the pam_exec line must never be left alone, since on
 # its own it would grant access without any check.
+auth		optional	pam_exec.so quiet /usr/local/lib/auth-prompts/quiet-tty # chwd-fprintd
 auth		[success=ignore default=1]	pam_fprintd.so # chwd-fprintd
 auth		sufficient	pam_exec.so quiet stdout /usr/local/lib/auth-prompts/granted fingerprint # chwd-fprintd
+auth		optional	pam_exec.so quiet /usr/local/lib/auth-prompts/quiet-tty # chwd-fprintd
 auth		include		system-auth
 auth		optional	pam_exec.so quiet stdout /usr/local/lib/auth-prompts/granted password
 account		include		system-auth

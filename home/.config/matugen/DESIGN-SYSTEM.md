@@ -70,7 +70,7 @@ A surface is the window-level container. Every visible thing lives in one.
 | **Toast** | something happened, no answer needed | notification: square box, heavier frame | none | none |
 | **OSD** | the level you just changed | plain card, cut corner | none | none, clicks pass through |
 | **Full screen** | lock and login | layout on the wallpaper, edge lines, dim micro-text | blurred wallpaper | exclusive |
-| **Terminal panel** | sudo's fingerprint and password prompts (`~/.config/auth-prompts/`) | 46-column text panel redrawn in place, cut corner glyph | NetTech's fixed palette, not the theme | the terminal's |
+| **Terminal panel** | sudo's fingerprint and password prompts (`~/.config/auth-prompts/`) | 46-column card redrawn in place, shaped like fastfetch's sections: filled header strip, tree rows, bottom edge ending in `╱`; errors on one line below the card | NetTech's fixed palette, not the theme; only the strip is filled | the terminal's |
 
 Rules:
 

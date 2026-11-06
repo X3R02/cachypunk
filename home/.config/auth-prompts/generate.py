@@ -1,47 +1,50 @@
 #!/usr/bin/env python3
-"""Write fprintd.po and sudoers.po: the auth prompts as one live NetTech panel.
+"""Write fprintd.po and sudoers.po: the auth prompts as one live NetTech card.
 
 Both are en_US gettext catalogs. pam_fprintd hands sudo one message per
 fingerprint state and sudoers supplies the password prompt and the retry
 note; sudo prints each verbatim followed by a newline. Instead of stacking,
-the messages share one fixed panel and move the cursor over it, so the panel
-updates in place:
+the messages share one fixed card, shaped like fastfetch's sections (a filled
+header strip, tree rows, a bottom edge ending in a 45-degree cut), and move
+the cursor over it, so the card updates in place:
 
     1  header strip        drawn by prompts
-    2  status line         drawn by notes only, prompts skip it
-    3  request band        drawn by prompts
-    4  hint / input line   drawn by prompts; the password is typed here
-    5  (cursor rests here after a prompt, so command output starts clean)
+    2  request row         drawn by prompts
+    3  hint / input row    drawn by prompts; the password is typed here
+    4  bottom edge         drawn by prompts
+    5  status line         drawn by notes only, prompts skip it
 
-A prompt is drawn from line 1 down. A note (a failed scan, a wrong password)
-climbs from line 5 to the status line and redraws only that; a "final" note
-is followed by a new prompt, so it leaves the cursor above line 1 for that
-prompt to redraw the panel, while a "retry" note returns to line 5 because
-the reader keeps scanning without a new prompt.
+A prompt is drawn from line 1 down. A fingerprint prompt, and every note
+(a failed scan, a wrong password), then parks the cursor above line 1, so
+sudo's newline brings it back to line 1, hidden: whatever comes next starts
+there, even when pam_fprintd ends silently (Ctrl+C during the scan skips to
+the password and prints nothing). A note moves to the status line and
+redraws only that. After the password, Enter leaves the cursor on line 4,
+so the messages that follow it start from there.
 
+Nothing paints a background except the header strip, whose text is the
+terminal's own background (reverse video), so the card sits on any theme.
 The palette is NetTech's own, sampled from the game (STYLEGUIDE.md 2.4), not
 the desktop theme. Only real information is shown: no decorative device
-branding or version strings. The Quickshell polkit card gets the same text and keeps only the
-line holding "//" (see polkit/PolkitDialog.qml), so every message needs one.
-sudo logs in the C locale (sudoers_locale), so the journal never sees these.
+branding or version strings. The Quickshell polkit card gets the same text
+and keeps only the line holding "//" (see polkit/PolkitDialog.qml), so every
+message needs one. sudo logs in the C locale (sudoers_locale), so the journal
+never sees these.
 
-A "verdict" redraws the header and the status line once auth is over: the
-granted one is printed by pam_exec from /etc/pam.d/sudo (pam-sudo here, with
-the `granted` script this writes), the locked-out one replaces sudo's
-"N incorrect password attempts". The password prompt leaves the colour on
-cyan over navy so pwfeedback's asterisks (sudoers-pwfeedback) land inside
-the panel; every later message starts with a reset.
+A "verdict" redraws the card once auth is over: the granted one is printed
+by pam_exec from /etc/pam.d/sudo (pam-sudo here, with the `granted` script
+this writes), the locked-out one replaces sudo's "N incorrect password
+attempts". The password prompt leaves the colour on cyan so pwfeedback's
+asterisks (sudoers-pwfeedback) land inside the card; every later message
+starts with a reset.
 """
 import os
-import re
 
-W = 46  # panel width in cells, cut corner included
-STATUS = 2  # status line, counted from the panel's first line
-BELOW = 5  # where the cursor rests after a prompt
+W = 46  # card width in cells, cut included
+EDGE = 4  # the bottom edge, counted from the card's first line
+STATUS = 5  # the status line
 
 LIME = (203, 231, 87)
-NAVY = (13, 16, 23)
-BAND = (21, 53, 90)
 CYAN = (87, 208, 215)
 RED = (255, 59, 69)
 GREEN = (28, 217, 123)
@@ -55,81 +58,88 @@ def fg(c):
     return f"{ESC}[38;2;{c[0]};{c[1]};{c[2]}m"
 
 
-def bg(c):
-    return f"{ESC}[48;2;{c[0]};{c[1]};{c[2]}m"
-
-
 def up(n):
-    return f"{ESC}[{n}A"
+    # A count of 0 still moves one line in most terminals
+    return f"{ESC}[{n}A" if n else ""
 
 
 def down(n):
-    return f"{ESC}[{n}B"
+    return f"{ESC}[{n}B" if n else ""
 
 
 BOLD = f"{ESC}[1m"
+REVERSE = f"{ESC}[7m"
 RESET = f"{ESC}[0m"
 # Erase to the end of the line, so nothing from an earlier draw survives
 CLEAR = f"{ESC}[K"
 # Hide what the user types: while the reader waits the terminal still echoes
 CONCEAL = f"{ESC}[8m"
+# The cursor waits on line 1 during the scan, hidden; every later message
+# shows it again
+HIDE = f"{ESC}[?25l"
+SHOW = f"{ESC}[?25h"
 
 
-def row(fill, parts, cut=False):
-    """One panel line: parts are (colour, text) on a fill, padded to W."""
-    width = W - 1 if cut else W
-    body = "".join(fg(c) + t for c, t in parts)
-    # %u is sudo's attempt count, one digit wide
-    pad = width - sum(len(re.sub(r"\\033\[[0-9;]*m", "", t).replace("%u", "0"))
-                      for _, t in parts)
-    line = bg(fill) + body + " " * pad + RESET
-    if cut:
-        # The cut bottom-right corner: a triangle in the fill colour
-        line += fg(fill) + "◤" + RESET
-    return line + CLEAR
+def row(parts):
+    """One line of coloured text on the terminal's background."""
+    return "".join(fg(c) + t for c, t in parts) + RESET + CLEAR
 
 
-def header(title, fill=LIME):
-    return row(fill, [(NAVY, BOLD + " " + title)])
+def header(title, colour=LIME):
+    """The filled strip: the colour as background, the terminal's background
+    as text, padded to the card's width."""
+    pad = W - 1 - len(title)
+    return fg(colour) + REVERSE + BOLD + " " + title + " " * pad + RESET + CLEAR
 
 
-def prompt(title, request, value, hint, conceal=False):
-    """Lines 1-4, skipping the status line so a note on it survives. With
-    conceal, keys typed while it waits are drawn invisible on line 5."""
-    return (RESET + header(title) + NL + NL
-            + row(BAND, [(LIME, f" //{request}  "), (CYAN, "▣ " + value)])
-            + NL + row(NAVY, [(LIME, "   > "), (CYAN, hint)], cut=True)
-            + (CONCEAL if conceal else ""))
+def edge(colour=LIME):
+    return row([(colour, "└" + "─" * (W - 2) + "╱")])
 
 
-def note(colour, request, value, final):
-    """Redraw the status line from line 5 and park the cursor (see above).
-    Line 5 is wiped first: it may hold concealed keystrokes."""
-    climb = BELOW - STATUS
-    line = row(NAVY, [(colour, f" ✕ //{request}  "), (CYAN, value)])
-    # sudo's newline after the message then lands on line 1 or line 5
-    # A retry keeps the reader waiting, so it conceals again
-    after = up(STATUS) if final else down(climb - 1) + CONCEAL
-    return RESET + CR + CLEAR + up(climb) + CR + line + after
+def card(title, request, value, hint):
+    """Lines 1-4, leaving the cursor at the start of the status line, which
+    it does not touch, so a note on it survives."""
+    return (RESET + SHOW + header(title) + NL
+            + row([(LIME, f"│ ├ //{request}  "), (CYAN, "▣ " + value)]) + NL
+            + row([(LIME, "│ └ > "), (CYAN, hint)]) + NL
+            + edge() + NL)
 
 
-def verdict(title, colour, mark, request, value):
-    """From line 5, after auth: recolour the header, set the status line and
-    erase everything below it, so only the verdict stays and what follows
-    starts on line 3. Wipes line 5 first: sudo prefixes its own notes with
-    "sudo: "."""
-    status = row(NAVY, [(colour, f" {mark} //{request}  "), (CYAN, value)])
-    return (RESET + CR + CLEAR + up(BELOW - 1) + header(title, colour)
-            + CR + down(STATUS - 1) + status
-            + CR + down(1) + f"{ESC}[J" + up(1))
+def prompt(title, request, value, hint):
+    """A fingerprint prompt, parking the cursor above line 1. quiet-tty (see
+    pam-sudo) turns echo off while it waits; if that is missing, typed keys
+    are at least drawn invisible."""
+    return card(title, request, value, hint) + up(STATUS) + HIDE + CONCEAL
+
+
+def status(colour, mark, request, value):
+    return row([(colour, f" {mark} //{request}  "), (CYAN, value)])
+
+
+def note(colour, request, value, start=1):
+    """Redraw the status line from line `start` (1, or 4 after the password)
+    and park the cursor above line 1 (see above). The reader may keep
+    scanning after it, so it conceals again."""
+    line = status(colour, "✕", request, value)
+    return (RESET + CR + down(STATUS - start) + line + up(STATUS) + HIDE
+            + CONCEAL)
+
+
+def verdict(title, colour, mark, request, value, start):
+    """From line `start`, after auth: redraw the card as the header and one
+    row, erase everything below it, and leave the cursor so sudo's newline
+    lands on line 4, where what follows starts."""
+    return (RESET + SHOW + CR + up(start - 1) + header(title, colour) + NL
+            + row([(colour, f"│ └ {mark} //{request}  "), (CYAN, value)]) + NL
+            + edge(colour) + NL + f"{ESC}[J" + up(1))
 
 
 def retry(request, value):
-    return note(LIME, request, value, final=False)
+    return note(LIME, request, value)
 
 
-def denied(request, value):
-    return note(RED, request, value, final=True)
+def denied(request, value, start=1):
+    return note(RED, request, value, start=start)
 
 
 FINGERS = ["left thumb", "left index finger", "left middle finger",
@@ -148,11 +158,11 @@ for verb, prep, hint in (("Place", "on", "place finger on reader_"),
     for tail in ("%s", "the fingerprint reader"):
         fprintd.append((f"{verb} your finger {prep} {tail}",
                         prompt("BIOMETRIC ACCESS", "ACCESS_REQUEST",
-                               "ANY FINGER", hint, conceal=True)))
+                               "ANY FINGER", hint)))
         for f in FINGERS:
             fprintd.append((f"{verb} your {f} {prep} {tail}",
                             prompt("BIOMETRIC ACCESS", "ACCESS_REQUEST",
-                                   short(f), hint, conceal=True)))
+                                   short(f), hint)))
 
 fprintd += [
     # The reader keeps scanning after these
@@ -172,24 +182,34 @@ fprintd += [
     ("An unknown error occurred", denied("READER_FAULT", "falling back")),
 ]
 
-# The password is typed on line 4: draw the line in full to wipe the
-# fingerprint hint, then return to its start for the "> " the cursor sits on
-password = prompt("PASSWORD OVERRIDE", "MANUAL_AUTH", "USER PASSWORD", "")
-password += CR + bg(NAVY) + fg(LIME) + "   > " + fg(CYAN)
+# The password is typed on line 3: draw the card in full to wipe the
+# fingerprint hint, then climb back to its start for the "> " the cursor sits
+# on. Enter then moves the cursor to line 4
+password = card("PASSWORD OVERRIDE", "MANUAL_AUTH", "USER PASSWORD", "")
+password += up(STATUS - 3) + CR + fg(LIME) + "│ └ > " + fg(CYAN)
+
+# Ctrl+C or Ctrl+D at the password prompt: sudo gives up, prefixing "sudo: ".
+# `sudo -n` prints the same message with no card above it, so this never
+# climbs: it closes the card in place of its bottom edge and erases below
+cancelled = (RESET + SHOW + CR + status(RED, "✕", "NO_PASSWORD", "access denied")
+             + f"{ESC}[J")
 
 sudoers = [
     ("[sudo] password for %p: ", password),
-    ("Sorry, try again.", denied("BAD_PASSWORD", "access denied")),
+    ("Sorry, try again.", denied("BAD_PASSWORD", "access denied", start=EDGE)),
+    ("a password is required", cancelled),
     (("%u incorrect password attempt", "%u incorrect password attempts"),
-     [verdict("ACCESS DENIED", RED, "✕", "LOCKED_OUT", "%u failed attempt"),
-      verdict("ACCESS DENIED", RED, "✕", "LOCKED_OUT", "%u failed attempts")]),
+     [verdict("ACCESS DENIED", RED, "✕", "LOCKED_OUT", "%u failed attempt",
+              EDGE),
+      verdict("ACCESS DENIED", RED, "✕", "LOCKED_OUT", "%u failed attempts",
+              EDGE)]),
 ]
 
 granted = {
     "fingerprint": verdict("ACCESS GRANTED", GREEN, "✓", "AUTHORIZED",
-                           "fingerprint"),
+                           "fingerprint", 1),
     "password": verdict("ACCESS GRANTED", GREEN, "✓", "AUTHORIZED",
-                        "password"),
+                        "password", EDGE),
 }
 
 HEADER = '''# Generated by ~/.config/auth-prompts/generate.py - edit that, not this.
@@ -226,6 +246,8 @@ with open(os.path.join(here, "granted"), "w") as fh:
     fh.write("#!/bin/sh\n# Generated by ~/.config/auth-prompts/generate.py: "
              "the ACCESS GRANTED panel.\n# $1 is how the user got in: "
              "fingerprint or password.\n")
+    # quiet-tty turned echo and canonical mode off; back on
+    fh.write('stty -F "$PAM_TTY" echo icanon 2>/dev/null\n')
     fh.write('case "$1" in\n')
     for how, text in granted.items():
         fh.write(f"{how}) printf '{text}' ;;\n")

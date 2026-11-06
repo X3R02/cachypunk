@@ -2,7 +2,7 @@
 # Install the auth panel. Run as root, and keep a root shell open in another
 # terminal until sudo is confirmed working: this replaces /etc/pam.d/sudo.
 #   catalogs  /usr/share/locale/en_US/LC_MESSAGES/{fprintd,sudoers}.mo
-#   granted   /usr/local/lib/auth-prompts/granted (run by pam_exec)
+#   granted   /usr/local/lib/auth-prompts/{granted,quiet-tty} (run by pam_exec)
 #   hook      /etc/pacman.d/hooks/auth-prompts.hook + lib/check, msgids-* (warns)
 #   sudoers   /etc/sudoers.d/10-auth-prompts (pwfeedback)
 #   pam       /etc/pam.d/sudo (the stock one is kept as sudo.bak-auth-prompts)
@@ -18,8 +18,9 @@ for domain in fprintd sudoers; do
 	msgfmt -o "/usr/share/locale/en_US/LC_MESSAGES/$domain.mo" "$dir/$domain.po"
 done
 
-# pam_exec runs this as root: install a root-owned copy outside $HOME
+# pam_exec runs these as root: install a root-owned copy outside $HOME
 install -D -o root -g root -m 755 "$dir/granted" /usr/local/lib/auth-prompts/granted
+install -o root -g root -m 755 "$dir/quiet-tty" /usr/local/lib/auth-prompts/quiet-tty
 
 install -o root -g root -m 755 "$dir/check" /usr/local/lib/auth-prompts/check
 install -o root -g root -m 644 "$dir/msgids-fprintd" "$dir/msgids-sudoers" /usr/local/lib/auth-prompts/
