@@ -95,15 +95,6 @@ PanelWindow {
 						color: Colors.structure
 						font.pixelSize: 18
 					}
-
-					// Device fiction, as on every dialog in the game
-					BarText {
-						text: "Only CC35 certified and DHSF 5th class officers are allowed to manipulate, access or disable this device."
-						width: parent.width
-						wrapMode: Text.Wrap
-						color: Qt.rgba(Colors.structure.r, Colors.structure.g, Colors.structure.b, 0.6)
-						font.pixelSize: 8
-					}
 				}
 			}
 

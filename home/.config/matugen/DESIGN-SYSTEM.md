@@ -86,8 +86,10 @@ Rules:
   bracket and cell. A transparent gapper was tried and reverted (2026-10-13).
 - **The bracket is square at both ends** (Frame, ModalCard, walker): the
   guide's small notch at its foot read as a spike.
-- Full-screen surfaces are the only place for decorative device micro-text
-  and edge lines.
+- Full-screen surfaces are the only place for device micro-text and edge
+  lines. The micro-text there says what the screen expects ("TOUCH THE
+  FINGERPRINT READER OR TYPE YOUR PASSWORD TO UNLOCK."), never lore filler;
+  modals carry none, their prose already explains them (2026-11-06).
 
 ## 3. Components
 
@@ -102,7 +104,7 @@ Rules:
 | PanelDivider | `PanelDivider.qml` | separates groups | — |
 | Chip | `Chip.qml` | a state ("CONNECTED", "DEFAULT", "ACTIVE") | text only |
 | SegmentBar | `SegmentBar.qml` | any level or progress | — |
-| ModalCard | `ModalCard.qml` | the body of a modal | heading, prose, fields, micro-text |
+| ModalCard | `ModalCard.qml` | the body of a modal | heading, prose, fields |
 | Frame | `Frame.qml` | the body of a panel or tooltip | panel entries |
 
 Nesting rules:
@@ -133,8 +135,8 @@ Nesting rules:
 - A **PanelRow** holds at most one Chip *or* one detail, never both. A state
   is a Chip; a number (signal %, battery %) is a detail.
 - A **Chip** never contains an icon and is never a button.
-- A **ModalCard** holds the question or heading, prose, at most one field,
-  and micro-text. Its buttons sit *below* the card, BACK first, joined to
+- A **ModalCard** holds the question or heading, prose and at most one field.
+  Its buttons sit *below* the card, BACK first, joined to
   the action by a short line.
 - Buttons are never put inside rows, and rows never inside buttons.
 - **Buttons sharing a row read as one control**: the first cuts its

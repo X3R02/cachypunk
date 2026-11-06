@@ -283,7 +283,7 @@ Rectangle {
 					text: "Wrong password"
 				}
 
-				// Device fiction, as on every dialog in the game
+				// What this screen expects, in the device's micro-text
 				Caps {
 					width: parent.width
 					topPadding: 4
@@ -292,7 +292,7 @@ Rectangle {
 					font.letterSpacing: 0.6
 					color: config.structure
 					opacity: 0.6
-					text: "Only CC35 certified and DHSF 5th class officers are allowed to manipulate, access or disable this device."
+					text: "Type your password to log in."
 				}
 			}
 		}

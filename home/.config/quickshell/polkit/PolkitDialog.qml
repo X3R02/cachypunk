@@ -199,16 +199,6 @@ PanelWindow {
 				text: dialog.note
 				color: dialog.flow?.supplementaryIsError ? Colors.alert : Colors.fgDim
 			}
-
-			// Device fiction, as on every dialog in the game
-			BarText {
-				width: parent.width
-				topPadding: 4
-				wrapMode: Text.Wrap
-				text: "Only CC35 certified and DHSF 5th class officers are allowed to manipulate, access or disable this device."
-				color: Qt.rgba(Colors.structure.r, Colors.structure.g, Colors.structure.b, 0.6)
-				font.pixelSize: 8
-			}
 		}
 	}
 
