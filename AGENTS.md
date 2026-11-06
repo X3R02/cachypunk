@@ -184,3 +184,8 @@ Look-and-feel rules belong in `DESIGN-SYSTEM.md`, not here.
 - Dead keys (latam `^` is AltGr + the key right of Ñ) only compose in GTK4
   apps with `GTK_IM_MODULE=simple` (`hypr/lua/env.lua`): with no fcitx/ibus,
   the default wayland IM module types the base key instead (2026-10-19).
+- The browser's "Open xdg-open" ending in the GTK portal's "No apps
+  available" dialog means no `.desktop` declares `x-scheme-handler/<scheme>`
+  (`xdg-mime query default x-scheme-handler/<scheme>` is empty). Web apps get
+  theirs from `webapp` (`~/.local/bin`, not in the repo): `known_schemes` and
+  `--scheme`, rewritten to https by `webapp --open` (2026-10-20).
