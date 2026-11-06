@@ -201,6 +201,7 @@ PanelWindow {
 			spacing: 0
 
 			PanelButton {
+				solid: true
 				width: 150
 				label: "Back"
 				// Alone while the reader waits; first of a pair once the
@@ -219,6 +220,7 @@ PanelWindow {
 			}
 
 			PanelButton {
+				solid: true
 				width: 150
 				label: "Authenticate"
 				visible: dialog.wantsPassword

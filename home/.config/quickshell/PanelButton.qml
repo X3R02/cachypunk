@@ -17,6 +17,8 @@ Item {
 	property string cut: "right"
 	// The panel opens with its cursor here instead of on the first entry
 	property bool preferred: false
+	// No see-through backing plane: set on every modal's buttons
+	property bool solid: false
 
 	readonly property bool navigable: true
 	readonly property var panelWindow: QsWindow.window
@@ -39,6 +41,7 @@ Item {
 		focused: btn.hovered
 		enabled: btn.enabled
 		cut: btn.cut
+		solid: btn.solid
 	}
 
 	Row {

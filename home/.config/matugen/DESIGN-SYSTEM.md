@@ -73,6 +73,8 @@ A surface is the window-level container. Every visible thing lives in one.
 
 Rules:
 
+- **Nothing behind a modal shows through it**: cards, buttons and pickers'
+  cards are opaque; only the dim around them is translucent (2026-11-06).
 - **One modal at a time.** A modal never opens a panel; a panel closes before
   a modal opens.
 - **Panels hang from their bar segment** and close on Escape or any press
@@ -136,7 +138,8 @@ Nesting rules:
 - A **Chip** never contains an icon and is never a button.
 - A **ModalCard** holds the question or heading, prose and at most one field.
   Its buttons sit *below* the card, BACK first, joined to
-  the action by a short line.
+  the action by a short line. Card and buttons are opaque (buttons through
+  `PanelButton.solid`): nothing behind a modal shows through it.
 - Buttons are never put inside rows, and rows never inside buttons.
 - **Buttons sharing a row read as one control**: the first cuts its
   bottom-left corner, the middle ones are square, the last cuts its

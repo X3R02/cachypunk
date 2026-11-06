@@ -32,6 +32,16 @@ Item {
 		width: parent.width
 		height: 200
 
+		// Opaque under the image: the card stays a card while it decodes (or
+		// if it is missing), and an image with alpha never shows the screen
+		NotchRect {
+			anchors.fill: parent
+			notch: Theme.notch
+			tabStep: Theme.cardTab
+			fillColor: Colors.bg
+			strokeColor: "transparent"
+		}
+
 		// The image, masked by the card's own shape
 		Image {
 			id: image
@@ -67,16 +77,6 @@ Item {
 			maskThresholdMin: 0.5
 			maskSpreadAtMin: 1
 			autoPaddingEnabled: false
-		}
-
-		// Not decoded yet (or missing): the card stays a card
-		NotchRect {
-			visible: image.status !== Image.Ready
-			anchors.fill: parent
-			notch: Theme.notch
-			tabStep: Theme.cardTab
-			fillColor: Colors.bg
-			strokeColor: "transparent"
 		}
 
 		NotchRect {

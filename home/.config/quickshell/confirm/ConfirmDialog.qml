@@ -104,6 +104,7 @@ PanelWindow {
 
 				PanelButton {
 					id: back
+					solid: true
 
 					width: 150
 					label: "Back"
@@ -121,6 +122,7 @@ PanelWindow {
 
 				PanelButton {
 					id: go
+					solid: true
 
 					width: 150
 					label: Confirm.action

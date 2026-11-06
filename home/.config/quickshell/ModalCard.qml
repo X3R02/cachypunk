@@ -18,18 +18,10 @@ Item {
 	implicitWidth: Math.ceil(bracketWidth + gapper + contentWidth + padding * 2)
 	implicitHeight: Math.ceil(body.childrenRect.height + padding * 2 + Theme.cardTab)
 
-	// Backing plane behind all three parts, so the gapper reads dark
+	// Opaque backing plane behind all three parts: nothing behind a modal
+	// shows through it, gapper included
 	Rectangle {
 		anchors.fill: parent
-		color: Qt.rgba(Colors.bg.r, Colors.bg.g, Colors.bg.b, 0.95)
-	}
-
-	// The gapper itself is fully opaque: the backing above lets 5% through,
-	// and nothing behind may show between bracket and cell. Like Frame's, it
-	// runs under the bracket and into the cell so no half-pixel seam is left
-	Rectangle {
-		width: card.bracketWidth + card.gapper + 4
-		height: parent.height
 		color: Colors.bg
 	}
 

@@ -18,6 +18,9 @@ Item {
 	property bool enabled: true
 	// The cut corner, for entries sharing a row (see NotchRect)
 	property string cut: "right"
+	// An opaque backing plane, for entries with nothing solid behind them:
+	// a modal's buttons sit below its card, over the dimmed screen
+	property bool solid: false
 
 	property bool flashing: false
 	readonly property real fill: flashing ? Theme.flashFill : focused ? Theme.hoverFill : active ? Theme.activeFill : 0
@@ -37,12 +40,13 @@ Item {
 	}
 
 	// The backing plane every entry sits on (#0E0E17 at 80% for buttons in
-	// the guide), so an entry stays readable wherever it is placed
+	// the guide, opaque when `solid`), so an entry stays readable wherever it
+	// is placed
 	NotchRect {
 		anchors.fill: parent
 		notch: Theme.notchSmall
 		cut: frame.cut
-		fillColor: Qt.rgba(Colors.bg.r, Colors.bg.g, Colors.bg.b, 0.8)
+		fillColor: Qt.rgba(Colors.bg.r, Colors.bg.g, Colors.bg.b, frame.solid ? 1 : 0.8)
 		strokeColor: "transparent"
 	}
 
